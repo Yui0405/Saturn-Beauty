@@ -1,0 +1,59 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "ana.garcia",
+      "email": "ana@example.com",
+      "role": "admin",
+      "name": "Ana García",
+      "bio": "Administradora principal de la tienda",
+      "avatar": "/images/avatars/ana.jpg",
+      "joinDate": "2023-01-15T00:00:00Z",
+      "lastLogin": "2023-05-30T14:30:00Z"
+    },
+    {
+      "id": "2",
+      "username": "carlos.lopez",
+      "email": "carlos@example.com",
+      "role": "user",
+      "name": "Carlos López",
+      "bio": "Cliente frecuente",
+      "avatar": "/images/avatars/carlos.jpg",
+      "joinDate": "2023-02-20T00:00:00Z",
+      "lastLogin": "2023-05-29T10:15:00Z"
+    },
+    {
+      "id": "3",
+      "username": "maria.rodriguez",
+      "email": "maria@example.com",
+      "role": "user",
+      "name": "María Rodríguez",
+      "bio": "Amante de los productos naturales",
+      "avatar": "/images/avatars/maria.jpg",
+      "joinDate": "2023-03-10T00:00:00Z",
+      "lastLogin": "2023-05-30T16:45:00Z"
+    },
+    {
+      "id": "4",
+      "username": "juan.martinez",
+      "email": "juan@example.com",
+      "role": "user",
+      "name": "Juan Martínez",
+      "bio": "Nuevo en el cuidado de la piel",
+      "avatar": "/images/avatars/juan.jpg",
+      "joinDate": "2023-04-05T00:00:00Z",
+      "lastLogin": "2023-05-28T11:20:00Z"
+    },
+    {
+      "id": "5",
+      "username": "laura.sanchez",
+      "email": "laura@example.com",
+      "role": "user",
+      "name": "Laura Sánchez",
+      "bio": "Entusiasta de la cosmética coreana",
+      "avatar": "/images/avatars/laura.jpg",
+      "joinDate": "2023-05-15T00:00:00Z",
+      "lastLogin": "2023-05-30T09:10:00Z"
+    }
+  ]
+}

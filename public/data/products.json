@@ -1,0 +1,148 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Crema Hidratante Intensa",
+      "description": "Hidratación profunda para pieles secas con ácido hialurónico y manteca de karité.",
+      "rating": 4.8,
+      "skinType": "Seca",
+      "category": "Cuidado",
+      "price": 29.99,
+      "stock": 50,
+      "image": "/images/products/crema-hidratante.jpg",
+      "popularity": "Alta"
+    },
+    {
+      "id": "2",
+      "name": "Serum Vitamina C",
+      "description": "Ilumina y unifica el tono de la piel con un 20% de vitamina C pura.",
+      "rating": 4.9,
+      "skinType": "Mixta",
+      "category": "Cuidado",
+      "price": 39.99,
+      "stock": 35,
+      "image": "/images/products/serum-vitamina-c.jpg",
+      "popularity": "Alta"
+    },
+    {
+      "id": "3",
+      "name": "Aceite Facial Regenerador",
+      "description": "Aceite nutritivo con rosa mosqueta y jojoba para una piel radiante.",
+      "rating": 4.7,
+      "skinType": "Seca",
+      "category": "Cuidado",
+      "price": 34.99,
+      "stock": 25,
+      "image": "/images/products/aceite-facial.jpg",
+      "popularity": "Media"
+    },
+    {
+      "id": "4",
+      "name": "Gel Limpiador Espumoso",
+      "description": "Limpia profundamente sin resecar, ideal para pieles grasas y mixtas.",
+      "rating": 4.5,
+      "skinType": "Grasa",
+      "category": "Cuidado",
+      "price": 18.99,
+      "stock": 40,
+      "image": "/images/products/gel-limpiador.jpg",
+      "popularity": "Media"
+    },
+    {
+      "id": "5",
+      "name": "Mascarilla de Arcilla Purificante",
+      "description": "Elimina impurezas y controla el exceso de grasa con arcilla verde.",
+      "rating": 4.6,
+      "skinType": "Grasa",
+      "category": "Cuidado",
+      "price": 24.99,
+      "stock": 30,
+      "image": "/images/products/mascarilla-arcilla.jpg",
+      "popularity": "Media"
+    },
+    {
+      "id": "6",
+      "name": "Contorno de Ojos Antiarrugas",
+      "description": "Reduce ojeras y patas de gallo con péptidos y cafeína.",
+      "rating": 4.7,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 32.99,
+      "stock": 20,
+      "image": "/images/products/contorno-ojos.jpg",
+      "popularity": "Alta"
+    },
+    {
+      "id": "7",
+      "name": "Protector Solar FPS 50+",
+      "description": "Protección de amplio espectro con textura ligera no grasa.",
+      "rating": 4.9,
+      "skinType": "Todas",
+      "category": "Cuidado",
+      "price": 27.99,
+      "stock": 45,
+      "image": "/images/products/protector-solar.jpg",
+      "popularity": "Alta"
+    },
+    {
+      "id": "8",
+      "name": "Exfoliante Facial Suave",
+      "description": "Exfoliación delicada con partículas de jojoba para todo tipo de piel.",
+      "rating": 4.4,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 21.99,
+      "stock": 35,
+      "image": "/images/products/exfoliante-facial.jpg",
+      "popularity": "Media"
+    },
+    {
+      "id": "9",
+      "name": "Agua Micelar Desmaquillante",
+      "description": "Elimina maquillaje e impurezas sin necesidad de aclarado.",
+      "rating": 4.6,
+      "skinType": "Todas",
+      "category": "Maquillaje",
+      "price": 16.99,
+      "stock": 50,
+      "image": "/images/products/agua-micelar.jpg",
+      "popularity": "Baja"
+    },
+    {
+      "id": "10",
+      "name": "Crema de Noche Reparadora",
+      "description": "Reparación intensiva nocturna con retinol y péptidos.",
+      "rating": 4.8,
+      "skinType": "Madura",
+      "category": "Cuidado",
+      "price": 42.99,
+      "stock": 20,
+      "image": "/images/products/crema-noche.jpg",
+      "popularity": "Alta"
+    },
+    {
+      "id": "11",
+      "name": "Tónico Facial Hidratante",
+      "description": "Hidrata y equilibra el pH de la piel después de la limpieza.",
+      "rating": 4.5,
+      "skinType": "Mixta",
+      "category": "Cuidado",
+      "price": 19.99,
+      "stock": 40,
+      "image": "/images/products/tonico-facial.jpg",
+      "popularity": "Media"
+    },
+    {
+      "id": "12",
+      "name": "Mascarilla de Ácido Hialurónico",
+      "description": "Hidratación intensa y efecto lifting inmediato.",
+      "rating": 4.7,
+      "skinType": "Seca",
+      "category": "Cuidado",
+      "price": 28.99,
+      "stock": 25,
+      "image": "/images/products/mascarilla-hialuronico.jpg",
+      "popularity": "Alta"
+    }
+  ]
+}

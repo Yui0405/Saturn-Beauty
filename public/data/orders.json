@@ -1,0 +1,68 @@
+{
+  "orders": [
+    {
+      "id": "1",
+      "code": "SB-1",
+      "userId": "2",
+      "userName": "Carlos López",
+      "date": "2023-05-28T14:30:00Z",
+      "status": "entregado",
+      "total": 89.97,
+      "products": [
+        { "id": "1", "name": "Crema Hidratante Intensa", "price": 29.99, "quantity": 2 },
+        { "id": "3", "name": "Aceite Facial Regenerador", "price": 34.99, "quantity": 1 }
+      ]
+    },
+    {
+      "id": "2",
+      "code": "SB-2",
+      "userId": "3",
+      "userName": "María Rodríguez",
+      "date": "2023-05-29T10:15:00Z",
+      "status": "entregado",
+      "total": 64.98,
+      "products": [
+        { "id": "2", "name": "Serum Vitamina C", "price": 39.99, "quantity": 1 },
+        { "id": "5", "name": "Mascarilla de Arcilla Purificante", "price": 24.99, "quantity": 1 }
+      ]
+    },
+    {
+      "id": "3",
+      "code": "SB-3",
+      "userId": "4",
+      "userName": "Juan Martínez",
+      "date": "2023-05-30T11:45:00Z",
+      "status": "en proceso",
+      "total": 42.99,
+      "products": [
+        { "id": "10", "name": "Crema de Noche Reparadora", "price": 42.99, "quantity": 1 }
+      ]
+    },
+    {
+      "id": "4",
+      "code": "SB-4",
+      "userId": "5",
+      "userName": "Laura Sánchez",
+      "date": "2023-05-30T16:30:00Z",
+      "status": "en proceso",
+      "total": 76.97,
+      "products": [
+        { "id": "7", "name": "Protector Solar FPS 50+", "price": 27.99, "quantity": 2 },
+        { "id": "9", "name": "Agua Micelar Desmaquillante", "price": 20.99, "quantity": 1 }
+      ]
+    },
+    {
+      "id": "5",
+      "code": "SB-5",
+      "userId": "2",
+      "userName": "Carlos López",
+      "date": "2023-05-31T09:20:00Z",
+      "status": "en proceso",
+      "total": 58.98,
+      "products": [
+        { "id": "4", "name": "Gel Limpiador Espumoso", "price": 18.99, "quantity": 1 },
+        { "id": "6", "name": "Contorno de Ojos Antiarrugas", "price": 39.99, "quantity": 1 }
+      ]
+    }
+  ]
+}
