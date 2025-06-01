@@ -4,13 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
-type Tip = {
-  id: string;
-  title: string;
-  description: string;
-  authorName: string;
-  image: string;
-};
+import { Tip } from "@/lib/api-service";
 
 export default function TipsSection() {
   const [tips, setTips] = useState<Tip[]>([]);
@@ -19,18 +13,31 @@ export default function TipsSection() {
 
   const fetchTips = async () => {
     try {
-      const response = await fetch("/api/tips", {
-        next: { revalidate: 0 }, // Disable cache for real-time updates
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setTips(data);
+      // Intentar cargar desde localStorage primero para tener cambios locales
+      const savedTips = localStorage.getItem('saturn-tips');
+      
+      if (savedTips) {
+        const data = JSON.parse(savedTips);
+        setTips(data.tips || []);
         setError(null);
       } else {
-        throw new Error("Error fetching tips");
+        // Si no hay datos guardados, cargar del archivo JSON
+        const response = await fetch("/data/tips.json");
+        if (response.ok) {
+          const data = await response.json();
+          // Convertir los ids numéricos a string si es necesario
+          const tipsWithStringIds = data.tips.map((tip: any) => ({
+            ...tip,
+            id: String(tip.id)
+          }));
+          setTips(tipsWithStringIds);
+          setError(null);
+        } else {
+          throw new Error("Error cargando consejos");
+        }
       }
     } catch (error) {
-      console.error("Error fetching tips:", error);
+      console.error("Error cargando consejos:", error);
       setError(error as Error);
     } finally {
       setIsLoading(false);
@@ -40,18 +47,23 @@ export default function TipsSection() {
   useEffect(() => {
     fetchTips();
 
-    // Set up real-time polling
-    const pollInterval = setInterval(fetchTips, 30000); // Poll every 30 seconds
+    // Escuchar cambios en localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'saturn-tips') {
+        fetchTips();
+      }
+    };
 
-    return () => clearInterval(pollInterval);
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   if (error) {
     return (
       <div className="text-center text-red-600 p-4 bg-red-50 rounded-lg">
-        <p>Error loading tips. Please try again later.</p>
+        <p>Error al cargar consejos. Por favor, intenta nuevamente más tarde.</p>
         <Button onClick={fetchTips} variant="outline" className="mt-2">
-          Retry
+          Reintentar
         </Button>
       </div>
     );
@@ -92,9 +104,9 @@ export default function TipsSection() {
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="text-gray-600 font-poppins">{tip.description}</p>
+                <p className="text-gray-600 font-poppins">{tip.content}</p>
                 <p className="text-sm text-mint-green mt-2 font-poppins">
-                  Por: {tip.authorName}
+                  Por: {tip.author}
                 </p>
               </div>
             </div>

@@ -33,9 +33,71 @@ export default function CreateNewsPage() {
     url: "https://sonicteamargentina.blogspot.com/p/sonic-hedgehog-comics-en-espanol.html",
     image: "",
   });
+  const [errors, setErrors] = useState({
+    title: "",
+    content: "",
+    url: "",
+  });
+
+  const validateForm = (): boolean => {
+    const newErrors = {
+      title: "",
+      content: "",
+      url: "",
+    };
+    let isValid = true;
+
+    // Validar título
+    if (!formData.title) {
+      newErrors.title = "El título es obligatorio";
+      isValid = false;
+    } else if (formData.title.length > 100) {
+      newErrors.title = `El título debe tener máximo 100 caracteres (actual: ${formData.title.length})`;
+      isValid = false;
+    }
+
+    // Validar contenido
+    if (!formData.content) {
+      newErrors.content = "El contenido es obligatorio";
+      isValid = false;
+    } else if (formData.content.length < 50) {
+      newErrors.content = `El contenido debe tener al menos 50 caracteres (actual: ${formData.content.length})`;
+      isValid = false;
+    } else if (formData.content.length > 400) {
+      newErrors.content = `El contenido debe tener máximo 400 caracteres (actual: ${formData.content.length})`;
+      isValid = false;
+    }
+
+    // Validar URL
+    if (!formData.url) {
+      newErrors.url = "La URL es obligatoria";
+      isValid = false;
+    } else {
+      try {
+        new URL(formData.url);
+      } catch (e) {
+        newErrors.url = "Por favor, introduce una URL válida";
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar formulario antes de procesar
+    if (!validateForm()) {
+      toast({
+        title: "Error de validación",
+        description: "Por favor, corrige los errores en el formulario",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -92,11 +154,23 @@ export default function CreateNewsPage() {
           <Input
             id="title"
             value={formData.title}
-            onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, title: e.target.value });
+              // Limpiar error si el usuario está corrigiendo
+              if (errors.title && e.target.value) {
+                setErrors({...errors, title: ""});
+              }
+            }}
+            maxLength={100}
+            className={errors.title ? "border-red-500" : ""}
             required
           />
+          {errors.title && (
+            <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">
+            {formData.title.length}/100 caracteres
+          </p>
         </div>
 
         <div>
@@ -105,11 +179,27 @@ export default function CreateNewsPage() {
             id="url"
             type="url"
             value={formData.url}
-            onChange={(e) =>
-              setFormData({ ...formData, url: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, url: e.target.value });
+              // Limpiar error si el usuario está corrigiendo
+              if (errors.url && e.target.value) {
+                try {
+                  new URL(e.target.value);
+                  setErrors({...errors, url: ""});
+                } catch (e) {
+                  // No limpiar error si la URL sigue siendo inválida
+                }
+              }
+            }}
+            className={errors.url ? "border-red-500" : ""}
             required
           />
+          {errors.url && (
+            <p className="text-red-500 text-xs mt-1">{errors.url}</p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">
+            Ejemplo: https://www.example.com/noticia
+          </p>
         </div>
 
 
@@ -119,12 +209,26 @@ export default function CreateNewsPage() {
           <Textarea
             id="content"
             value={formData.content}
-            onChange={(e) =>
-              setFormData({ ...formData, content: e.target.value })
-            }
+            onChange={(e) => {
+              setFormData({ ...formData, content: e.target.value });
+              // Limpiar error si el usuario está corrigiendo
+              if (errors.content && e.target.value.length >= 50 && e.target.value.length <= 400) {
+                setErrors({...errors, content: ""});
+              }
+            }}
             required
-            className="min-h-[200px]"
+            className={`min-h-[200px] ${errors.content ? "border-red-500" : ""}`}
           />
+          <div className="flex justify-between">
+            <div>
+              {errors.content && (
+                <p className="text-red-500 text-xs mt-1">{errors.content}</p>
+              )}
+            </div>
+            <div className={`text-xs ${formData.content.length < 50 || formData.content.length > 400 ? "text-red-500" : "text-gray-500"}`}>
+              {formData.content.length}/400 caracteres
+            </div>
+          </div>
         </div>
 
         <ImageUpload

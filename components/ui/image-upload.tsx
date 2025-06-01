@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Input } from "./input";
 import { Label } from "./label";
 import { toast } from "@/hooks/use-toast";
+import { compressImage } from "@/lib/image-utils";
 
 interface ImageUploadProps {
   label?: string;
@@ -44,10 +45,23 @@ export function ImageUpload({
         });
         return;
       }
+      
+      // Mostrar toast de compresión
+      toast({
+        title: "Procesando imagen",
+        description: "Comprimiendo imagen para mejorar el rendimiento...",
+      });
 
-      // Subir imagen
+      // Comprimir imagen antes de subir
+      const compressedFile = await compressImage(file, {
+        maxSizeMB: 0.5, // Comprimir a máximo 500KB
+        maxWidthOrHeight: 1200, // Limitar dimensiones
+        useWebWorker: true, // Usar worker para no bloquear la interfaz
+      });
+      
+      // Subir imagen comprimida
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressedFile);
       formData.append("type", type);
 
       const response = await fetch("/api/upload", {
@@ -65,6 +79,16 @@ export function ImageUpload({
       // Actualizar preview y notificar al componente padre
       setPreviewImage(url);
       onImageUpload(url);
+      
+      // Notificar éxito con información de compresión
+      const compressionPercent = Math.round((1 - compressedFile.size / file.size) * 100);
+      const originalSize = (file.size / 1024 / 1024).toFixed(2);
+      const compressedSize = (compressedFile.size / 1024 / 1024).toFixed(2);
+      
+      toast({
+        title: "Imagen subida exitosamente",
+        description: `Tamaño original: ${originalSize}MB → Comprimido: ${compressedSize}MB (${compressionPercent}% reducción)`,
+      });
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({

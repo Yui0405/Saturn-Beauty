@@ -6,7 +6,7 @@
       "category": "Cuidado Básico",
       "content": "Aplica crema hidratante por la mañana y por la noche para mantener tu piel suave y elástica. No olvides el cuello y el escote.",
       "author": "Dr. Carlos",
-      "image": "/images/tips/tip1.jpg"
+      "image": "/images/tips/tips1.jpg"
     },
     {
       "id": 2,
@@ -14,7 +14,7 @@
       "category": "Protección",
       "content": "Usa protector solar todos los días, incluso en días nublados. Reaplica cada 2 horas si estás al aire libre.",
       "author": "Dr. Arturo",
-      "image": "/images/tips/tip2.jpg"
+      "image": "/images/tips/tips2.jpg"
     },
     {
       "id": 3,
@@ -22,7 +22,7 @@
       "category": "Rutina Nocturna",
       "content": "Nunca te vayas a dormir con maquillaje. Usa un desmaquillante suave seguido de tu limpiador facial habitual.",
       "author": "Dra. Laura",
-      "image": "/images/tips/tip3.jpg"
+      "image": "/images/tips/tips3.webp"
     }
   ]
 }
