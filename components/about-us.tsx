@@ -10,31 +10,39 @@ const teamMembers = [
     name: "María López",
     position: "Fundadora y CEO",
     bio: "Con más de 15 años de experiencia en la industria cosmética, María fundó Saturn Beauty con la visión de crear productos naturales y sostenibles.",
-    image: "/about-us/Maria.webp",
+    image: "/images/about-us/Maria.webp",
   },
   {
     id: 2,
     name: "Carlos Rodríguez",
     position: "Director de Investigación y Desarrollo",
     bio: "Doctor en Química Cosmética, Carlos lidera nuestro equipo de investigación para desarrollar fórmulas innovadoras con ingredientes naturales.",
-    image: "/about-us/Carlos.webp",
+    image: "/images/about-us/Carlos.webp",
   },
   {
     id: 3,
     name: "Laura Sánchez",
     position: "Directora de Sostenibilidad",
     bio: "Especialista en prácticas sostenibles, Laura se asegura de que todos nuestros productos y procesos sean respetuosos con el medio ambiente.",
-    image: "/about-us/Laura.jpg",
+    image: "/images/about-us/Laura.jpg",
   },
   {
     id: 4,
     name: "Javier Martín",
     position: "Director Creativo",
     bio: "Con su ojo para el diseño y la estética, Javier es responsable de la imagen de marca y el diseño de producto de Saturn Beauty.",
-    image: "/about-us/Javier.jpg",
+    image: "/images/about-us/Javier.jpg",
   },
 ]
 
+/**
+ * This component renders the "About Us" page for Saturn Beauty,
+ * showcasing the company's history, values, team members, and commitments.
+ * It includes various sections with descriptive text and images, highlighting
+ * the brand's mission to celebrate natural beauty, sustainability, inclusion,
+ * and high-quality products. The page is structured using responsive grid layouts
+ * to provide a visually appealing and informative experience.
+ */
 export default function AboutUs() {
 
   return (
@@ -58,7 +66,7 @@ export default function AboutUs() {
           </p>
         </div>
         <div className="relative h-80 rounded-lg overflow-hidden">
-          <Image src="/about-us/about1.webp" alt="Productos de belleza naturales" fill className="object-cover" />
+          <Image src="/images/about-us/about1.webp" alt="Productos de belleza naturales" fill className="object-cover" />
         </div>
       </div>
 
@@ -116,7 +124,7 @@ export default function AboutUs() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="relative h-80 rounded-lg overflow-hidden">
             <Image
-              src="/about-us/about2.webp"
+              src="/images/about-us/about2.webp"
               alt="Compromiso con la sostenibilidad"
               fill
               className="object-cover"

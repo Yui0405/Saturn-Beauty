@@ -235,22 +235,31 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
   }, [initialTab])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     if (name.includes(".")) {
-      const [parent, child] = name.split(".")
-      setEditedUser((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent as keyof typeof prev],
-          [child]: value,
-        },
-      }))
+      const [parent, child] = name.split(".");
+      
+      setEditedUser((prev) => {
+        // Asegurarnos de que prev[parent] sea tratado como un objeto
+        const parentValue = prev[parent as keyof typeof prev];
+        const parentObject = parentValue && typeof parentValue === 'object' && !Array.isArray(parentValue)
+          ? { ...parentValue }
+          : {};
+          
+        return {
+          ...prev,
+          [parent]: {
+            ...parentObject,
+            [child]: value,
+          },
+        };
+      });
     } else {
       setEditedUser((prev) => ({
         ...prev,
         [name]: value,
-      }))
+      }));
     }
   }
 

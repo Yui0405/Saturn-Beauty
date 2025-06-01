@@ -25,9 +25,9 @@ export interface Tip {
 export interface News {
   id: string;
   title: string;
-  description: string;
+  content: string;
   image: string;
-  originalUrl: string;
+  url: string;
   date: string;
 }
 

@@ -13,19 +13,28 @@ import { ImageUpload } from "@/components/ui/image-upload";
 export default function NoticiasPage() {
   const [news, setNews] = useState<News[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<News | null>(null);
+  const [formData, setFormData] = useState<Partial<News> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await fetch("/api/news");
-        if (response.ok) {
-          const data = await response.json();
-          setNews(data);
+        // Intentar cargar desde localStorage primero
+        const savedNews = localStorage.getItem('saturn-news');
+        
+        if (savedNews) {
+          const data = JSON.parse(savedNews);
+          setNews(data.news || []);
+        } else {
+          // Si no hay datos guardados, cargar del archivo JSON
+          const response = await fetch("/data/news.json");
+          if (response.ok) {
+            const data = await response.json();
+            setNews(data.news);
+          }
         }
       } catch (error) {
-        console.error("Error fetching news:", error);
+        console.error("Error cargando noticias:", error);
         toast({
           title: "Error",
           description: "No se pudieron cargar las noticias",
@@ -38,46 +47,36 @@ export default function NoticiasPage() {
   }, []);
 
   const handleEdit = (newsItem: News) => {
-    setFormData(newsItem);
+    setFormData({
+      ...newsItem
+    });
     setEditingId(newsItem.id);
   };
   const handleSave = async (id: string) => {
     if (!formData) return;
     setIsLoading(true);
 
-    // Optimistically update the UI
-    const previousNews = [...news];
-    setNews(news.map((item) => (item.id === id ? formData : item)));
-    setEditingId(null);
-    setFormData(null);
-
     try {
-      const response = await fetch("/api/news", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      // Actualizar la UI primero
+      const updatedNews = news.map(item => 
+        item.id === id ? { ...formData } as News : item
+      );
+      setNews(updatedNews);
+      setEditingId(null);
+      setFormData(null);
 
-      if (!response.ok) {
-        throw new Error("Error updating news");
-      }
+      // Guardar en localStorage
+      localStorage.setItem('saturn-news', JSON.stringify({ news: updatedNews }));
 
       toast({
-        title: "Noticia actualizada",
-        description: "Los cambios han sido guardados exitosamente.",
+        title: "¡Listo!",
+        description: "La noticia se ha actualizado correctamente.",
       });
     } catch (error) {
-      // Revert to previous state on error
-      setNews(previousNews);
-      setEditingId(id);
-      setFormData(formData);
-
-      console.error("Error saving news:", error);
+      console.error("Error al guardar la noticia:", error);
       toast({
         title: "Error",
-        description: "No se pudo actualizar la noticia",
+        description: "No se pudo guardar la noticia. Los cambios no persisten después de recargar.",
         variant: "destructive",
       });
     } finally {
@@ -119,24 +118,30 @@ export default function NoticiasPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    Descripción
+                    Contenido
                   </label>
                   <Textarea
-                    value={formData?.description}
+                    value={formData?.content || ''}
                     onChange={(e) =>
-                      setFormData({ ...formData!, description: e.target.value })
+                      setFormData({ 
+                        ...formData!, 
+                        content: e.target.value
+                      })
                     }
                     className="resize-none h-24"
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    URL Original
+                    URL
                   </label>
                   <Input
-                    value={formData?.originalUrl}
+                    value={formData?.url || ''}
                     onChange={(e) =>
-                      setFormData({ ...formData!, originalUrl: e.target.value })
+                      setFormData({ 
+                        ...formData!, 
+                        url: e.target.value
+                      })
                     }
                   />
                 </div>
@@ -185,19 +190,20 @@ export default function NoticiasPage() {
                     {item.title}
                   </h3>
                   <p className="text-gray-600 mb-4 line-clamp-3">
-                    {item.description}
+                    {item.content}
                   </p>
                   <div className="flex justify-between items-center">
                     <a
-                      href={item.originalUrl}
+                      href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="text-mint-green-dark hover:underline"
                     >
                       <Button
                         variant="link"
                         className="text-mint-green-dark p-0 h-auto"
                       >
-                        Ver original
+                        Ver noticia
                       </Button>
                     </a>
                     <Button

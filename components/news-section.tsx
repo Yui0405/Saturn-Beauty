@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 type News = {
   id: string;
   title: string;
-  description: string;
+  content: string; // Usamos directamente content como en el resto de la aplicación
   image: string;
-  originalUrl: string;
-  date: string;
+  originalUrl: string; // Ahora usamos originalUrl como en la página de administración
+  date?: string; // Opcional ya que no existe en el JSON
 };
 
 export default function NewsSection() {
@@ -21,18 +21,33 @@ export default function NewsSection() {
 
   const fetchNews = async () => {
     try {
-      const response = await fetch("/api/news", {
-        next: { revalidate: 0 }, // Deshabilitar caché para actualizaciones en tiempo real
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setNews(data);
-        setError(null);
+      // Intentar cargar desde localStorage primero, como en la página de administración
+      const savedNews = localStorage.getItem('saturn-news');
+      
+      if (savedNews) {
+        const data = JSON.parse(savedNews);
+        setNews(data.news || []);
       } else {
-        throw new Error("Error al cargar las noticias");
+        // Si no hay datos guardados, cargar del archivo JSON
+        const response = await fetch('/data/news.json');
+        if (response.ok) {
+          const data = await response.json();
+          // Ajustar los campos según el estándar actual de la aplicación
+          const transformedNews = data.news.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            content: item.content, // Usar content directamente
+            image: item.image,
+            originalUrl: item.url // Mapear url a originalUrl como en la página de admin
+          }));
+          setNews(transformedNews);
+        } else {
+          throw new Error('Error al cargar las noticias');
+        }
       }
+      setError(null);
     } catch (error) {
-      console.error("Error al cargar noticias:", error);
+      console.error('Error al cargar noticias:', error);
       setError(error as Error);
     } finally {
       setIsLoading(false);
@@ -113,7 +128,7 @@ export default function NewsSection() {
                 {item.title}
               </h3>
               <p className="text-gray-600 mb-4 line-clamp-3 font-poppins">
-                {item.description}
+                {item.content}
               </p>
               <a
                 href={item.originalUrl}

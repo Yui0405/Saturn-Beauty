@@ -7,7 +7,7 @@ export default function Hero() {
     <section className="relative h-[500px] overflow-hidden">
       <div className="absolute inset-0">
         <Image
-          src="/Banner.png"
+          src="/images/Banner.png"
           alt="Mujer rodeada de flores naturales"
           width={1920}
           height={500}

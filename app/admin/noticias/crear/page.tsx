@@ -30,9 +30,8 @@ export default function CreateNewsPage() {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    category: "",
+    url: "https://sonicteamargentina.blogspot.com/p/sonic-hedgehog-comics-en-espanol.html",
     image: "",
-    publishDate: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,19 +39,39 @@ export default function CreateNewsPage() {
     setIsLoading(true);
 
     try {
-      // Aquí iría la lógica para enviar los datos a la API
-      console.log("Datos de la noticia:", formData);
+      // Obtener noticias existentes de localStorage o del JSON inicial
+      const localNews = localStorage.getItem('saturn-news');
+      const existingNews = localNews ? JSON.parse(localNews) : [];
+      
+      // Crear nueva noticia
+      const newNews = {
+        id: Date.now().toString(),
+        title: formData.title,
+        content: formData.content,
+        url: formData.url,
+        image: formData.image || "/images/placeholder.jpg"
+      };
 
+      // Actualizar la lista de noticias
+      const updatedNews = [newNews, ...existingNews];
+      
+      // Guardar en localStorage
+      localStorage.setItem('saturn-news', JSON.stringify(updatedNews));
+      
       toast({
-        title: "Noticia creada",
-        description: "La noticia ha sido creada exitosamente.",
+        title: "¡Noticia creada!",
+        description: "La noticia ha sido creada correctamente (cambios locales).",
       });
 
-      router.push("/admin/noticias");
+      // Redirigir después de un breve retraso para que se vea el toast
+      setTimeout(() => {
+        router.push("/admin/noticias");
+      }, 1000);
     } catch (error) {
+      console.error("Error al crear la noticia:", error);
       toast({
         title: "Error",
-        description: "Hubo un error al crear la noticia.",
+        description: "No se pudo crear la noticia. Los cambios no persisten después de recargar.",
         variant: "destructive",
       });
     } finally {
@@ -81,38 +100,19 @@ export default function CreateNewsPage() {
         </div>
 
         <div>
-          <Label htmlFor="category">Categoría</Label>
-          <Select
-            value={formData.category}
-            onValueChange={(value) =>
-              setFormData({ ...formData, category: value })
-            }
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Seleccionar categoría" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="publishDate">Fecha de Publicación</Label>
+          <Label htmlFor="url">URL de la noticia</Label>
           <Input
-            id="publishDate"
-            type="datetime-local"
-            value={formData.publishDate}
+            id="url"
+            type="url"
+            value={formData.url}
             onChange={(e) =>
-              setFormData({ ...formData, publishDate: e.target.value })
+              setFormData({ ...formData, url: e.target.value })
             }
             required
           />
         </div>
+
+
 
         <div>
           <Label htmlFor="content">Contenido</Label>

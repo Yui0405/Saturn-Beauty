@@ -1,5 +1,5 @@
 {
-  "products": [
+"products": [
     {
       "id": "1",
       "name": "Crema Hidratante Intensa",
@@ -9,8 +9,7 @@
       "category": "Cuidado",
       "price": 29.99,
       "stock": 50,
-      "image": "/images/products/crema-hidratante.jpg",
-      "popularity": "Alta"
+      "image": "/images/products/photo_2025-05-22_00-33-37.jpg"
     },
     {
       "id": "2",
@@ -21,8 +20,7 @@
       "category": "Cuidado",
       "price": 39.99,
       "stock": 35,
-      "image": "/images/products/serum-vitamina-c.jpg",
-      "popularity": "Alta"
+      "image": "/images/products/photo_2025-05-22_00-33-39.jpg"
     },
     {
       "id": "3",
@@ -33,8 +31,7 @@
       "category": "Cuidado",
       "price": 34.99,
       "stock": 25,
-      "image": "/images/products/aceite-facial.jpg",
-      "popularity": "Media"
+      "image": "/images/products/photo_2025-05-22_00-33-40.jpg"
     },
     {
       "id": "4",
@@ -45,8 +42,7 @@
       "category": "Cuidado",
       "price": 18.99,
       "stock": 40,
-      "image": "/images/products/gel-limpiador.jpg",
-      "popularity": "Media"
+      "image": "/images/products/photo_2025-05-22_00-33-43.jpg"
     },
     {
       "id": "5",
@@ -57,8 +53,7 @@
       "category": "Cuidado",
       "price": 24.99,
       "stock": 30,
-      "image": "/images/products/mascarilla-arcilla.jpg",
-      "popularity": "Media"
+      "image": "/images/products/photo_2025-05-22_00-33-44.jpg"
     },
     {
       "id": "6",
@@ -69,8 +64,7 @@
       "category": "Cuidado",
       "price": 32.99,
       "stock": 20,
-      "image": "/images/products/contorno-ojos.jpg",
-      "popularity": "Alta"
+      "image": "/images/products/photo_2025-05-22_00-33-46.jpg"
     },
     {
       "id": "7",
@@ -81,8 +75,7 @@
       "category": "Cuidado",
       "price": 27.99,
       "stock": 45,
-      "image": "/images/products/protector-solar.jpg",
-      "popularity": "Alta"
+      "image": "/images/products/photo_2025-05-22_00-33-48.jpg"
     },
     {
       "id": "8",
@@ -93,8 +86,7 @@
       "category": "Cuidado",
       "price": 21.99,
       "stock": 35,
-      "image": "/images/products/exfoliante-facial.jpg",
-      "popularity": "Media"
+      "image": "/images/products/photo_2025-05-22_00-33-52.jpg"
     },
     {
       "id": "9",
@@ -105,8 +97,7 @@
       "category": "Maquillaje",
       "price": 16.99,
       "stock": 50,
-      "image": "/images/products/agua-micelar.jpg",
-      "popularity": "Baja"
+      "image": "/images/products/photo_2025-05-22_00-34-00.jpg"
     },
     {
       "id": "10",
@@ -117,8 +108,7 @@
       "category": "Cuidado",
       "price": 42.99,
       "stock": 20,
-      "image": "/images/products/crema-noche.jpg",
-      "popularity": "Alta"
+      "image": "/images/products/photo_2025-05-22_00-34-02.jpg"
     },
     {
       "id": "11",
@@ -129,8 +119,7 @@
       "category": "Cuidado",
       "price": 19.99,
       "stock": 40,
-      "image": "/images/products/tonico-facial.jpg",
-      "popularity": "Media"
+      "image": "/images/products/photo_2025-05-22_00-34-04.jpg"
     },
     {
       "id": "12",
@@ -141,8 +130,140 @@
       "category": "Cuidado",
       "price": 28.99,
       "stock": 25,
-      "image": "/images/products/mascarilla-hialuronico.jpg",
-      "popularity": "Alta"
+      "image": "/images/products/photo_2025-05-22_00-34-06.jpg"
+    },
+    {
+      "id": "13",
+      "name": "Exfoliante Corporal con Café",
+      "description": "Exfoliación corporal con café y azúcar para una piel suave y lisa.",
+      "rating": 4.6,
+      "skinType": "Todas",
+      "category": "Cuidado",
+      "price": 24.99,
+      "stock": 30,
+      "image": "/images/products/photo_2025-05-22_00-34-08.jpg"
+    },
+    {
+      "id": "14",
+      "name": "Crema de Día Regeneradora",
+      "description": "Regeneración y protección diaria con retinol y vitamina E.",
+      "rating": 4.9,
+      "skinType": "Madura",
+      "category": "Cuidado",
+      "price": 39.99,
+      "stock": 20,
+      "image": "/images/products/photo_2025-05-22_00-34-10.jpg"
+    },
+    {
+      "id": "15",
+      "name": "Tónico Facial con Aloe Vera",
+      "description": "Tónico facial hidratante con aloe vera y vitamina C.",
+      "rating": 4.4,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 17.99,
+      "stock": 45,
+      "image": "/images/products/photo_2025-05-22_00-34-12.jpg"
+    },
+    {
+      "id": "16",
+      "name": "Crema Hidratante Facial con Avena",
+      "description": "Crema hidratante facial con avena y vitamina E.",
+      "rating": 4.7,
+      "skinType": "Seca",
+      "category": "Cuidado",
+      "price": 29.99,
+      "stock": 35,
+      "image": "/images/products/photo_2025-05-22_00-34-14.jpg"
+    },
+    {
+      "id": "17",
+      "name": "Sérum de Jazmín",
+      "description": "Sérum facial con aceite de jazmín y vitamina C.",
+      "rating": 4.8,
+      "skinType": "Normal",
+      "category": "Cuidado",
+      "price": 44.99,
+      "stock": 25,
+      "image": "/images/products/photo_2025-05-22_00-34-16.jpg"
+    },
+    {
+      "id": "18",
+      "name": "Aceite de Rosa",
+      "description": "Aceite de rosa facial con vitamina E y aceite de jojoba.",
+      "rating": 4.5,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 49.99,
+      "stock": 15,
+      "image": "/images/products/photo_2025-05-22_00-34-18.jpg"
+    },
+    {
+      "id": "19",
+      "name": "Crema de Noche Anti-Arrugas",
+      "description": "Crema de noche anti-arrugas con retinol y péptidos.",
+      "rating": 4.6,
+      "skinType": "Madura",
+      "category": "Cuidado",
+      "price": 49.99,
+      "stock": 20,
+      "image": "/images/products/photo_2025-05-22_00-34-20.jpg"
+    },
+    {
+      "id": "20",
+      "name": "Exfoliante Facial con Azúcar",
+      "description": "Exfoliante facial suave con azúcar y aceite de jojoba.",
+      "rating": 4.4,
+      "skinType": "Todas",
+      "category": "Cuidado",
+      "price": 19.99,
+      "stock": 40,
+      "image": "/images/products/photo_2025-05-22_00-34-22.jpg"
+    },
+    {
+      "id": "21",
+      "name": "Tónico Facial con Hamamelis",
+      "description": "Tónico facial hidratante con hamamelis y vitamina C.",
+      "rating": 4.5,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 17.99,
+      "stock": 45,
+      "image": "/images/products/photo_2025-05-22_00-34-24.jpg"
+    },
+    {
+      "id": "22",
+      "name": "Crema de Día SPF 30",
+      "description": "Crema de día hidratante con SPF 30 y vitamina E.",
+      "rating": 4.7,
+      "skinType": "Normal",
+      "category": "Cuidado",
+      "price": 29.99,
+      "stock": 35,
+      "image": "/images/products/photo_2025-05-22_00-34-26.jpg"
+    },
+    {
+      "id": "23",
+      "name": "Mascarilla de Seda",
+      "description": "Mascarilla facial hidratante con proteínas de seda.",
+      "rating": 4.8,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 34.99,
+      "stock": 25,
+      "image": "/images/products/photo_2025-05-22_00-34-28.jpg"
+    },
+    {
+      "id": "24",
+      "name": "Aceite de Oliva",
+      "description": "Aceite de oliva facial con vitamina E y aceite de jojoba.",
+      "rating": 4.5,
+      "skinType": "Sensible",
+      "category": "Cuidado",
+      "price": 49.99,
+      "stock": 15,
+      "image": "/images/products/photo_2025-05-22_00-34-30.jpg"
     }
   ]
 }
+    

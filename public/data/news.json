@@ -3,57 +3,23 @@
     {
       "id": "1",
       "title": "Nueva Línea de Cuidado Nocturno",
-      "content": "<p>Descubre nuestra nueva línea de cuidado nocturno formulada con ingredientes 100% naturales que trabajan mientras duermes para una piel radiante al despertar. Nuestra exclusiva fórmula incluye ácido hialurónico puro, extracto de semilla de uva y manteca de karité orgánica.</p><p>Beneficios clave:</p><ul><li>Hidratación profunda durante la noche</li><li>Reducción de líneas finas y arrugas</li><li>Textura no grasa de rápida absorción</li><li>Ingredientes naturales y libres de crueldad animal</li></ul>",
-      "category": "Lanzamientos",
-      "image": "/images/news/night-care.jpg",
-      "publishDate": "2023-05-25T10:00:00Z",
-      "author": "Ana García",
-      "summary": "Descubre nuestra nueva línea de cuidado nocturno con ingredientes naturales.",
-      "isFeatured": true
+      "content": "Descubre nuestra nueva línea de cuidado nocturno formulada con ingredientes 100% naturales que trabajan mientras duermes para una piel radiante al despertar. Nuestra exclusiva fórmula incluye ácido hialurónico puro, extracto de semilla de uva y manteca de karité orgánica. Beneficios clave: Hidratación profunda durante la noche Reducción de líneas finas y arrugas Textura no grasa de rápida absorción Ingredientes naturales y libres de crueldad animal",
+      "url": "https://www.vogue.es/articulos/pelo-graso-truco-viral-lowcost-farmaceutica-tiktok",
+      "image": "/images/news/news1.jpg"
     },
     {
       "id": "2",
       "title": "Guía de Cuidado para Piel Seca",
-      "content": "<p>¿Tienes la piel seca o deshidratada? Nuestra guía completa te ayudará a elegir los productos adecuados para restaurar la hidratación de tu piel. Aprende sobre los ingredientes clave como el ácido hialurónico, ceramidas y manteca de karité que tu piel necesita.</p><p>En esta guía encontrarás:</p><ul><li>Rutina de cuidado matutina y nocturna</li><li>Los mejores ingredientes para piel seca</li><li>Consejos para el cuidado en diferentes estaciones</li><li>Productos recomendados por expertos</li></ul>",
-      "category": "Tutoriales",
-      "image": "/images/news/dry-skin-guide.jpg",
-      "publishDate": "2023-05-20T14:30:00Z",
-      "author": "Carlos López",
-      "summary": "Consejos expertos para el cuidado diario de pieles secas y sensibles.",
-      "isFeatured": true
+      "content": "¿Tienes la piel seca o deshidratada? Nuestra guía completa te ayudará a elegir los productos adecuados para restaurar la hidratación de tu piel. Aprende sobre los ingredientes clave como el ácido hialurónico, ceramidas y manteca de karité que tu piel necesita. En esta guía encontrarás: Rutina de cuidado matutina y nocturna Los mejores ingredientes para piel seca Consejos para el cuidado en diferentes estaciones Productos recomendados por expertos",
+      "url": "https://www.vogue.es/articulos/pelo-graso-truco-viral-lowcost-farmaceutica-tiktok",
+      "image": "/images/news/news2.jpg"
     },
     {
       "id": "3",
       "title": "Lanzamiento: Protector Solar Mineral",
-      "content": "<p>Presentamos nuestro nuevo Protector Solar Mineral FPS 50+, formulado con óxido de zinc no nano para una protección segura y efectiva contra los rayos UVA/UVB. Ideal para todo tipo de piel, incluyendo las más sensibles.</p><p>Características principales:</p><ul><li>Protección de amplio espectro</li><li>Resistente al agua (hasta 80 minutos)</li><li>Textura ligera y no grasa</li><li>Libre de fragancias y aceites</li><li>Ideal para uso diario</li></ul>",
-      "category": "Lanzamientos",
-      "image": "/images/news/sunscreen.jpg",
-      "publishDate": "2023-05-15T09:15:00Z",
-      "author": "María Rodríguez",
-      "summary": "Nuevo protector solar mineral con FPS 50+ para una protección segura y natural.",
-      "isFeatured": false
-    },
-    {
-      "id": "4",
-      "title": "Rutina de Cuidado Coreana en 10 Pasos",
-      "content": "<p>Descubre los secretos de la famosa rutina coreana de 10 pasos para una piel radiante y saludable. Este método de cuidado de la piel ha ganado popularidad mundial por su enfoque en la hidratación y protección de la piel.</p><p>Los 10 pasos esenciales:</p><ol><li>Desmaquillado con aceite</li><li>Limpieza con espuma</li><li>Exfoliación suave</li><li>Tónico facial</li><li>Esencia</li><li>Tratamientos (sérums y ampollas)</li><li>Mascarilla</li><li>Contorno de ojos</li><li>Hidratante</li><li>Protector solar (de día) o crema de noche</li></ol>",
-      "category": "Tutoriales",
-      "image": "/images/news/korean-routine.jpg",
-      "publishDate": "2023-05-10T11:45:00Z",
-      "author": "Juan Martínez",
-      "summary": "Aprende los secretos del cuidado de la piel al estilo coreano en 10 pasos.",
-      "isFeatured": true
-    },
-    {
-      "id": "5",
-      "title": "Ingredientes Clave para el Verano",
-      "content": "<p>El verano está a la vuelta de la esquina y es importante adaptar nuestra rutina de cuidado de la piel. Estos son los ingredientes clave que no pueden faltar en tu rutina estival:</p><p><strong>Ácido Hialurónico:</strong> Hidrata intensamente sin engrasar la piel.</p><p><strong>Vitamina C:</strong> Protege contra el daño solar y aclara las manchas.</p><p><strong>Niacinamida:</strong> Refuerza la barrera cutánea y reduce el enrojecimiento.</p><p><strong>Aloe Vera:</strong> Calma la piel después de la exposición solar.</p><p><strong>Antioxidantes:</strong> Combaten los radicales libres generados por la exposición al sol.</p>",
-      "category": "Tendencias",
-      "image": "/images/news/summer-ingredients.jpg",
-      "publishDate": "2023-05-05T16:20:00Z",
-      "author": "Laura Sánchez",
-      "summary": "Los ingredientes imprescindibles para mantener tu piel hidratada en verano.",
-      "isFeatured": false
+      "content": "Presentamos nuestro nuevo Protector Solar Mineral FPS 50+, formulado con óxido de zinc no nano para una protección segura y efectiva contra los rayos UVA/UVB. Ideal para todo tipo de piel, incluyendo las más sensibles. Características principales: Protección de amplio espectro Resistente al agua (hasta 80 minutos) Textura ligera y no grasa Libre de fragancias y aceites Ideal para uso diario",
+      "url": "https://www.vogue.es/articulos/pelo-graso-truco-viral-lowcost-farmaceutica-tiktok",
+      "image": "/images/news/news3.jpg"
     }
   ]
 }
