@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Grid3X3, List, Star, Heart } from "lucide-react";
+import { Grid3X3, List, Star, Heart, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -56,34 +56,54 @@ export default function ProductsGrid() {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(12);
   const [minRating, setMinRating] = useState<number>(0);
+  
+  // Estados para controlar el acordeón de filtros
+  const [categoryOpen, setCategoryOpen] = useState<boolean>(true);
+  const [priceOpen, setPriceOpen] = useState<boolean>(false);
+  const [popularityOpen, setPopularityOpen] = useState<boolean>(false);
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
 
-  // Cargar productos desde la API
+  // Cargar productos desde localStorage o JSON
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         console.log('Iniciando carga de productos...');
-        const response = await fetch('/api/products');
-        console.log('Respuesta de la API:', response.status, response.statusText);
         
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error en la respuesta:', errorText);
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        // Primero intentamos cargar desde localStorage
+        const cachedData = localStorage.getItem('saturn-products');
+        
+        if (cachedData) {
+          // Si hay datos en localStorage, los usamos
+          const parsedData = JSON.parse(cachedData);
+          console.log('Productos cargados desde localStorage:', parsedData.length);
+          setProducts(parsedData);
+        } else {
+          // Si no hay datos en localStorage, cargamos del JSON
+          const response = await fetch('/data/products.json');
+          console.log('Respuesta del JSON:', response.status, response.statusText);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error en la respuesta:', errorText);
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          console.log('Datos recibidos del JSON:', data);
+          
+          const productsData = data.products || [];
+          console.log('Productos procesados:', productsData);
+          
+          // Guardamos en localStorage para futuras cargas
+          localStorage.setItem('saturn-products', JSON.stringify(productsData));
+          
+          if (productsData.length === 0) {
+            console.warn('El JSON devolvió una lista vacía de productos');
+          }
+          
+          setProducts(productsData);
         }
-        
-        const data = await response.json();
-        console.log('Datos recibidos:', data);
-        
-        const productsData = Array.isArray(data) ? data : (data.products || []);
-        console.log('Productos procesados:', productsData);
-        
-        if (productsData.length === 0) {
-          console.warn('La API devolvió una lista vacía de productos');
-        }
-        
-        setProducts(productsData);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
         console.error('Error al cargar productos:', errorMessage);
@@ -94,6 +114,22 @@ export default function ProductsGrid() {
     };
 
     fetchProducts();
+    
+    // Añadir un event listener para detectar cambios en localStorage
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'saturn-products' && event.newValue) {
+        console.log('Detectado cambio en productos guardados');
+        const updatedProducts = JSON.parse(event.newValue);
+        setProducts(updatedProducts);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Limpiar el event listener
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Procesar productos
@@ -243,73 +279,249 @@ export default function ProductsGrid() {
       <div className="flex flex-col md:flex-row gap-8">
         {/* Filtros en el sidebar */}
         <div className="w-full md:w-64 flex-shrink-0">
-          <div className="sticky top-4 space-y-6">
-            <div>
-              <h3 className="font-semibold mb-2">Categorías</h3>
-              <div className="space-y-2">
-                {categories.map(category => (
-                  <div key={category} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`cat-${category}`}
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => handleCategoryChange(category)}
-                    />
-                    <Label htmlFor={`cat-${category}`} className="capitalize">
-                      {category}
-                    </Label>
-                  </div>
-                ))}
+          <div className="bg-white p-6 rounded-lg sticky top-4 space-y-6 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold mb-6 text-mint-green-dark">Filtros</h3>
+            
+            {/* Categoría - Acordeón */}
+            <div className="mb-4 border-b border-gray-200 pb-2">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => setCategoryOpen(!categoryOpen)}
+              >
+                <h3 className="font-semibold text-mint-green-dark">Categoría</h3>
+                {categoryOpen ? 
+                  <ChevronUp className="h-4 w-4 text-gray-500" /> : 
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                }
               </div>
+              
+              {categoryOpen && (
+                <div className="space-y-2 mt-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="cat-cuidado" 
+                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                      checked={selectedCategories.includes('Cuidado')}
+                      onCheckedChange={(checked) => {
+                        toggleCategory('Cuidado', !!checked);
+                      }}
+                    />
+                    <Label htmlFor="cat-cuidado">Cuidado</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="cat-bienestar" 
+                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                      checked={selectedCategories.includes('Bienestar')}
+                      onCheckedChange={(checked) => {
+                        toggleCategory('Bienestar', !!checked);
+                      }}
+                    />
+                    <Label htmlFor="cat-bienestar">Bienestar</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="cat-maquillaje" 
+                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                      checked={selectedCategories.includes('Maquillaje')}
+                      onCheckedChange={(checked) => {
+                        toggleCategory('Maquillaje', !!checked);
+                      }}
+                    />
+                    <Label htmlFor="cat-maquillaje">Maquillaje</Label>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">Rango de precios</h3>
-              <div className="space-y-2">
-                {['all', '0-20', '20-50', '50-100', '100+'].map(range => (
-                  <div key={range} className="flex items-center space-x-2">
+            {/* Precio - Acordeón */}
+            <div className="mb-4 border-b border-gray-200 pb-2">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => setPriceOpen(!priceOpen)}
+              >
+                <h3 className="font-semibold text-mint-green-dark">Precio</h3>
+                {priceOpen ? 
+                  <ChevronUp className="h-4 w-4 text-gray-500" /> : 
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                }
+              </div>
+              
+              {priceOpen && (
+                <div className="space-y-2 mt-3">
+                  <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id={`price-${range}`}
+                      id="price-all"
                       name="price-range"
-                      checked={priceRange === range}
-                      onChange={() => handlePriceRangeChange(range)}
-                      className="h-4 w-4 text-mint-green focus:ring-mint-green"
+                      checked={priceRange === 'all'}
+                      onChange={() => handlePriceRangeChange('all')}
+                      className="h-4 w-4 text-[#7ec9a8] focus:ring-[#7ec9a8]"
                     />
-                    <Label htmlFor={`price-${range}`} className="capitalize">
-                      {range === 'all' ? 'Todos los precios' : 
-                       range === '0-20' ? 'Menos de $20' :
-                       range === '20-50' ? '$20 - $50' :
-                       range === '50-100' ? '$50 - $100' : 'Más de $100'}
+                    <Label htmlFor="price-all">
+                      Todos los precios
                     </Label>
                   </div>
-                ))}
-              </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="price-0-20"
+                      name="price-range"
+                      checked={priceRange === '0-20'}
+                      onChange={() => handlePriceRangeChange('0-20')}
+                      className="h-4 w-4 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="price-0-20">
+                      Menos de $20
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="price-20-50"
+                      name="price-range"
+                      checked={priceRange === '20-50'}
+                      onChange={() => handlePriceRangeChange('20-50')}
+                      className="h-4 w-4 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="price-20-50">
+                      $20 - $50
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="price-50-100"
+                      name="price-range"
+                      checked={priceRange === '50-100'}
+                      onChange={() => handlePriceRangeChange('50-100')}
+                      className="h-4 w-4 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="price-50-100">
+                      $50 - $100
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="price-100plus"
+                      name="price-range"
+                      checked={priceRange === '100+'}
+                      onChange={() => handlePriceRangeChange('100+')}
+                      className="h-4 w-4 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="price-100plus">
+                      Más de $100
+                    </Label>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">Valoración mínima</h3>
-              <div className="px-2">
-                <Slider
-                  value={[minRating]}
-                  max={5}
-                  step={0.5}
-                  onValueChange={handleRatingChange}
-                  className="my-4"
-                />
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>0</span>
-                  <div className="flex items-center">
-                    {Array(5).fill(0).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${i < Math.floor(minRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                      />
-                    ))}
-                    <span className="ml-1">{minRating.toFixed(1)}</span>
-                  </div>
-                  <span>5</span>
-                </div>
+            {/* Popularidad - Acordeón */}
+            <div className="mb-4 border-b border-gray-200 pb-2">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => setPopularityOpen(!popularityOpen)}
+              >
+                <h3 className="font-semibold text-mint-green-dark">Popularidad</h3>
+                {popularityOpen ? 
+                  <ChevronUp className="h-4 w-4 text-gray-500" /> : 
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                }
               </div>
+              
+              {popularityOpen && (
+                <div className="space-y-2 mt-3">
+                  <div className="flex items-center justify-between">
+                    <input
+                      type="checkbox"
+                      id="pop-alta"
+                      checked={minRating >= 4}
+                      onChange={() => setMinRating(minRating >= 4 ? 0 : 4)}
+                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="pop-alta" className="flex-1 ml-2">
+                      Alta
+                    </Label>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                          key={star}
+                          className={`h-4 w-4 ${star <= 5 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <input
+                      type="checkbox"
+                      id="pop-media"
+                      checked={minRating >= 3 && minRating < 4}
+                      onChange={() => setMinRating(minRating >= 3 && minRating < 4 ? 0 : 3)}
+                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="pop-media" className="flex-1 ml-2">
+                      Media
+                    </Label>
+                    <div className="flex">
+                      {[1, 2, 3].map((star) => (
+                        <Star 
+                          key={star}
+                          className="h-4 w-4 text-yellow-400 fill-yellow-400"
+                        />
+                      ))}
+                      {[4, 5].map((star) => (
+                        <Star 
+                          key={star}
+                          className="h-4 w-4 text-gray-300"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <input
+                      type="checkbox"
+                      id="pop-baja"
+                      checked={minRating > 0 && minRating < 3}
+                      onChange={() => setMinRating(minRating > 0 && minRating < 3 ? 0 : 2)}
+                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
+                    />
+                    <Label htmlFor="pop-baja" className="flex-1 ml-2">
+                      Baja
+                    </Label>
+                    <div className="flex">
+                      {[1, 2].map((star) => (
+                        <Star 
+                          key={star}
+                          className="h-4 w-4 text-yellow-400 fill-yellow-400"
+                        />
+                      ))}
+                      {[3, 4, 5].map((star) => (
+                        <Star 
+                          key={star}
+                          className="h-4 w-4 text-gray-300"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Botón Limpiar filtros */}
+            <div className="mt-8 mb-4">
+              <button 
+                onClick={() => {
+                  setSelectedCategories([]);
+                  setPriceRange('all');
+                  setMinRating(0);
+                  setCurrentPage(1);
+                }}
+                className="w-full py-2 px-4 border bg-background border-mint-green text-mint-green-dark hover:bg-mint-green/10 hover:text-mint-green-dark rounded transition-colors"
+              >
+                Limpiar filtros
+              </button>
             </div>
           </div>
         </div>
@@ -317,49 +529,35 @@ export default function ProductsGrid() {
         {/* Contenido principal */}
         <div className="flex-1">
           {/* Controles de vista y ordenación */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="icon"
+              <button
                 onClick={() => setViewMode('grid')}
-                className={cn(
-                  'h-10 w-10',
-                  viewMode === 'grid' ? 'bg-mint-green hover:bg-accent-green' : 'hover:bg-mint-green-light'
-                )}
+                className={`w-8 h-8 rounded flex items-center justify-center ${viewMode === 'grid' ? 'elim text-white' : 'text-gray-600'}`}
               >
                 <Grid3X3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="icon"
+              </button>
+              <button
                 onClick={() => setViewMode('list')}
-                className={cn(
-                  'h-10 w-10',
-                  viewMode === 'list' ? 'bg-mint-green hover:bg-accent-green' : 'hover:bg-mint-green-light'
-                )}
+                className={`w-8 h-8 rounded flex items-center justify-center ${viewMode === 'list' ? 'elim text-white' : 'text-gray-600'}`}
               >
                 <List className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Select 
-                value={sortBy} 
-                onValueChange={(value) => setSortBy(value as SortOption)}
-                defaultValue="name-asc"
+            <div className="flex items-center">
+              <span className="mr-2 text-sm font-medium">Ordenar por:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#a8e6cf]"
               >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Ordenar por" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name-asc">Nombre (A-Z)</SelectItem>
-                  <SelectItem value="name-desc">Nombre (Z-A)</SelectItem>
-                  <SelectItem value="price-asc">Precio: menor a mayor</SelectItem>
-                  <SelectItem value="price-desc">Precio: mayor a menor</SelectItem>
-                  <SelectItem value="rating-desc">Mejor valorados</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="name-asc">Nombre (A-Z)</option>
+                <option value="name-desc">Nombre (Z-A)</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="rating-desc">Mejor valorados</option>
+              </select>
             </div>
           </div>
 
@@ -422,7 +620,7 @@ export default function ProductsGrid() {
                       </span>
                       
                       {/* Título */}
-                      <h3 className="font-medium text-gray-900 mt-1 mb-2 line-clamp-2 h-12 text-base">
+                      <h3 className="font-medium text-mint-green-dark mt-1 mb-2 line-clamp-2 h-12 text-base">
                         {product.name}
                       </h3>
                       

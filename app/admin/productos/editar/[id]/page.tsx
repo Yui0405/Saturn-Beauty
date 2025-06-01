@@ -70,17 +70,32 @@ export default function EditarProductoPage({
     try {
       setIsLoading(true);
 
-      const response = await fetch(`/api/products`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(product),
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al actualizar el producto");
+      // Cargar productos existentes desde localStorage o desde el JSON si no hay datos
+      let existingProducts: Product[] = [];
+      const cachedData = localStorage.getItem('saturn-products');
+      
+      if (cachedData) {
+        existingProducts = JSON.parse(cachedData);
+      } else {
+        // Si no hay datos en localStorage, cargamos del JSON
+        const response = await fetch("/data/products.json");
+        if (!response.ok) throw new Error("Error cargando productos");
+        const data = await response.json();
+        existingProducts = data.products;
       }
+
+      // Encontrar el índice del producto a actualizar
+      const productIndex = existingProducts.findIndex(p => p.id === product.id);
+      
+      if (productIndex === -1) {
+        throw new Error("Producto no encontrado");
+      }
+
+      // Actualizar el producto en el array
+      existingProducts[productIndex] = product;
+      
+      // Guardar en localStorage
+      localStorage.setItem('saturn-products', JSON.stringify(existingProducts));
 
       toast({
         title: "Éxito",

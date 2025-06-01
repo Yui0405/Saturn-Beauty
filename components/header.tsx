@@ -130,7 +130,7 @@ export default function Header() {
           <div className="w-2/4 flex justify-center">
             <Link
               href="/"
-              className="text-4xl font-bold text-lavender font-dancing-script hover:text-lavender-dark transition-colors"
+              className="text-4xl font-bold text-lavender font-dancing-script"
             >
               Saturn Beauty
             </Link>

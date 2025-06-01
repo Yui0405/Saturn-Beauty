@@ -52,11 +52,28 @@ export default function ProductosPage() {
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/data/products.json");
-      if (!response.ok) throw new Error("Error cargando productos");
+      
+      // Primero intentamos cargar desde localStorage
+      const cachedData = localStorage.getItem('saturn-products');
+      
+      if (cachedData) {
+        // Si hay datos en localStorage, los usamos
+        const parsedData = JSON.parse(cachedData);
+        setProducts(parsedData);
+        console.log('Productos cargados desde localStorage:', parsedData.length);
+      } else {
+        // Si no hay datos en localStorage, cargamos del JSON
+        const response = await fetch("/data/products.json");
+        if (!response.ok) throw new Error("Error cargando productos");
 
-      const data = await response.json();
-      setProducts(data.products);
+        const data = await response.json();
+        setProducts(data.products);
+        
+        // Guardamos en localStorage para futuras cargas
+        localStorage.setItem('saturn-products', JSON.stringify(data.products));
+        console.log('Productos cargados desde JSON y guardados en localStorage');
+      }
+      
       setError(null);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -77,16 +94,18 @@ export default function ProductosPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      // Optimistic update
+      // Guardamos el estado anterior por si hay error
       const previousProducts = [...products];
-      setProducts(products.filter((p) => p.id !== id));
+      
+      // Actualizamos la UI inmediatamente (optimistic update)
+      const updatedProducts = products.filter((p) => p.id !== id);
+      setProducts(updatedProducts);
 
-      // Simulate API call
+      // Simulamos un pequeño delay para mejorar UX
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Update localStorage to persist the change
-      const updatedProducts = products.filter((p) => p.id !== id);
-      localStorage.setItem("cachedProducts", JSON.stringify(updatedProducts));
+      // Actualizamos localStorage con los productos filtrados
+      localStorage.setItem("saturn-products", JSON.stringify(updatedProducts));
 
       toast({
         title: "Producto eliminado",
@@ -94,8 +113,8 @@ export default function ProductosPage() {
       });
     } catch (error) {
       console.error("Error deleting product:", error);
-      // Revert on error
-      setProducts(products);
+      // En caso de error, volvemos a cargar los productos
+      fetchProducts();
       toast({
         title: "Error",
         description: "No se pudo eliminar el producto",

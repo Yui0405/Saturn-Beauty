@@ -1,5 +1,5 @@
 {
-    "orders": [
+  "orders": [
     {
       "id": "1",
       "code": "SB-1",
@@ -9,8 +9,18 @@
       "status": "entregado",
       "total": 89.97,
       "products": [
-        { "id": "1", "name": "Crema Hidratante Intensa", "price": 29.99, "quantity": 2 },
-        { "id": "3", "name": "Aceite Facial Regenerador", "price": 34.99, "quantity": 1 }
+        {
+          "id": "1",
+          "name": "Crema Hidratante Intensa",
+          "price": 29.99,
+          "quantity": 2
+        },
+        {
+          "id": "3",
+          "name": "Aceite Facial Regenerador",
+          "price": 34.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -22,8 +32,18 @@
       "status": "entregado",
       "total": 64.98,
       "products": [
-        { "id": "2", "name": "Serum Vitamina C", "price": 39.99, "quantity": 1 },
-        { "id": "5", "name": "Mascarilla de Arcilla Purificante", "price": 24.99, "quantity": 1 }
+        {
+          "id": "2",
+          "name": "Serum Vitamina C",
+          "price": 39.99,
+          "quantity": 1
+        },
+        {
+          "id": "5",
+          "name": "Mascarilla de Arcilla Purificante",
+          "price": 24.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -35,7 +55,12 @@
       "status": "en proceso",
       "total": 42.99,
       "products": [
-        { "id": "10", "name": "Crema de Noche Reparadora", "price": 42.99, "quantity": 1 }
+        {
+          "id": "10",
+          "name": "Crema de Noche Reparadora",
+          "price": 42.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -47,8 +72,18 @@
       "status": "en proceso",
       "total": 72.97,
       "products": [
-        { "id": "7", "name": "Protector Solar FPS 50+", "price": 27.99, "quantity": 2 },
-        { "id": "9", "name": "Agua Micelar Desmaquillante", "price": 20.99, "quantity": 1 }
+        {
+          "id": "7",
+          "name": "Protector Solar FPS 50+",
+          "price": 27.99,
+          "quantity": 2
+        },
+        {
+          "id": "9",
+          "name": "Agua Micelar Desmaquillante",
+          "price": 20.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -60,8 +95,18 @@
       "status": "en proceso",
       "total": 51.98,
       "products": [
-        { "id": "4", "name": "Gel Limpiador Espumoso", "price": 18.99, "quantity": 1 },
-        { "id": "6", "name": "Contorno de Ojos Antiarrugas", "price": 39.99, "quantity": 1 }
+        {
+          "id": "4",
+          "name": "Gel Limpiador Espumoso",
+          "price": 18.99,
+          "quantity": 1
+        },
+        {
+          "id": "6",
+          "name": "Contorno de Ojos Antiarrugas",
+          "price": 39.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -73,9 +118,24 @@
       "status": "entregado",
       "total": 97.97,
       "products": [
-        { "id": "15", "name": "Tónico Facial con Aloe Vera", "price": 17.99, "quantity": 1 },
-        { "id": "19", "name": "Crema de Noche Anti-Arrugas", "price": 49.99, "quantity": 1 },
-        { "id": "22", "name": "Crema de Día SPF 30", "price": 29.99, "quantity": 1 }
+        {
+          "id": "15",
+          "name": "Tónico Facial con Aloe Vera",
+          "price": 17.99,
+          "quantity": 1
+        },
+        {
+          "id": "19",
+          "name": "Crema de Noche Anti-Arrugas",
+          "price": 49.99,
+          "quantity": 1
+        },
+        {
+          "id": "22",
+          "name": "Crema de Día SPF 30",
+          "price": 29.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -87,8 +147,18 @@
       "status": "en proceso",
       "total": 61.98,
       "products": [
-        { "id": "8", "name": "Exfoliante Facial Suave", "price": 21.99, "quantity": 1 },
-        { "id": "14", "name": "Crema de Día Regeneradora", "price": 39.99, "quantity": 1 }
+        {
+          "id": "8",
+          "name": "Exfoliante Facial Suave",
+          "price": 21.99,
+          "quantity": 1
+        },
+        {
+          "id": "14",
+          "name": "Crema de Día Regeneradora",
+          "price": 39.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -100,9 +170,24 @@
       "status": "entregado",
       "total": 89.97,
       "products": [
-        { "id": "11", "name": "Tónico Facial Hidratante", "price": 19.99, "quantity": 1 },
-        { "id": "17", "name": "Sérum de Jazmín", "price": 44.99, "quantity": 1 },
-        { "id": "20", "name": "Exfoliante Facial con Azúcar", "price": 19.99, "quantity": 1 }
+        {
+          "id": "11",
+          "name": "Tónico Facial Hidratante",
+          "price": 19.99,
+          "quantity": 1
+        },
+        {
+          "id": "17",
+          "name": "Sérum de Jazmín",
+          "price": 44.99,
+          "quantity": 1
+        },
+        {
+          "id": "20",
+          "name": "Exfoliante Facial con Azúcar",
+          "price": 19.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -114,9 +199,24 @@
       "status": "en proceso",
       "total": 97.97,
       "products": [
-        { "id": "16", "name": "Crema Hidratante Facial con Avena", "price": 29.99, "quantity": 1 },
-        { "id": "21", "name": "Tónico Facial con Hamamelis", "price": 17.99, "quantity": 1 },
-        { "id": "24", "name": "Aceite de Oliva", "price": 49.99, "quantity": 1 }
+        {
+          "id": "16",
+          "name": "Crema Hidratante Facial con Avena",
+          "price": 29.99,
+          "quantity": 1
+        },
+        {
+          "id": "21",
+          "name": "Tónico Facial con Hamamelis",
+          "price": 17.99,
+          "quantity": 1
+        },
+        {
+          "id": "24",
+          "name": "Aceite de Oliva",
+          "price": 49.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -125,11 +225,21 @@
       "userId": "10",
       "userName": "Inés Sánchez",
       "date": "2023-05-31T13:15:00Z",
-      "status": "pendiente",
+      "status": "en proceso",
       "total": 67.98,
       "products": [
-        { "id": "12", "name": "Mascarilla de Ácido Hialurónico", "price": 28.99, "quantity": 1 },
-        { "id": "18", "name": "Aceite de Rosa", "price": 49.99, "quantity": 1 }
+        {
+          "id": "12",
+          "name": "Mascarilla de Ácido Hialurónico",
+          "price": 28.99,
+          "quantity": 1
+        },
+        {
+          "id": "18",
+          "name": "Aceite de Rosa",
+          "price": 49.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -141,8 +251,18 @@
       "status": "pendiente",
       "total": 59.98,
       "products": [
-        { "id": "13", "name": "Exfoliante Corporal con Café", "price": 24.99, "quantity": 1 },
-        { "id": "23", "name": "Mascarilla de Seda", "price": 34.99, "quantity": 1 }
+        {
+          "id": "13",
+          "name": "Exfoliante Corporal con Café",
+          "price": 24.99,
+          "quantity": 1
+        },
+        {
+          "id": "23",
+          "name": "Mascarilla de Seda",
+          "price": 34.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -154,9 +274,24 @@
       "status": "en proceso",
       "total": 80.97,
       "products": [
-        { "id": "3", "name": "Aceite Facial Regenerador", "price": 34.99, "quantity": 1 },
-        { "id": "7", "name": "Protector Solar FPS 50+", "price": 27.99, "quantity": 1 },
-        { "id": "15", "name": "Tónico Facial con Aloe Vera", "price": 17.99, "quantity": 1 }
+        {
+          "id": "3",
+          "name": "Aceite Facial Regenerador",
+          "price": 34.99,
+          "quantity": 1
+        },
+        {
+          "id": "7",
+          "name": "Protector Solar FPS 50+",
+          "price": 27.99,
+          "quantity": 1
+        },
+        {
+          "id": "15",
+          "name": "Tónico Facial con Aloe Vera",
+          "price": 17.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -168,9 +303,24 @@
       "status": "entregado",
       "total": 109.97,
       "products": [
-        { "id": "2", "name": "Serum Vitamina C", "price": 39.99, "quantity": 1 },
-        { "id": "14", "name": "Crema de Día Regeneradora", "price": 39.99, "quantity": 1 },
-        { "id": "22", "name": "Crema de Día SPF 30", "price": 29.99, "quantity": 1 }
+        {
+          "id": "2",
+          "name": "Serum Vitamina C",
+          "price": 39.99,
+          "quantity": 1
+        },
+        {
+          "id": "14",
+          "name": "Crema de Día Regeneradora",
+          "price": 39.99,
+          "quantity": 1
+        },
+        {
+          "id": "22",
+          "name": "Crema de Día SPF 30",
+          "price": 29.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -182,9 +332,24 @@
       "status": "pendiente",
       "total": 67.98,
       "products": [
-        { "id": "5", "name": "Mascarilla de Arcilla Purificante", "price": 24.99, "quantity": 1 },
-        { "id": "9", "name": "Agua Micelar Desmaquillante", "price": 20.99, "quantity": 1 },
-        { "id": "20", "name": "Exfoliante Facial con Azúcar", "price": 19.99, "quantity": 1 }
+        {
+          "id": "5",
+          "name": "Mascarilla de Arcilla Purificante",
+          "price": 24.99,
+          "quantity": 1
+        },
+        {
+          "id": "9",
+          "name": "Agua Micelar Desmaquillante",
+          "price": 20.99,
+          "quantity": 1
+        },
+        {
+          "id": "20",
+          "name": "Exfoliante Facial con Azúcar",
+          "price": 19.99,
+          "quantity": 1
+        }
       ]
     },
     {
@@ -196,10 +361,30 @@
       "status": "entregado",
       "total": 150.96,
       "products": [
-        { "id": "1", "name": "Crema Hidratante Intensa", "price": 29.99, "quantity": 1 },
-        { "id": "6", "name": "Contorno de Ojos Antiarrugas", "price": 39.99, "quantity": 1 },
-        { "id": "10", "name": "Crema de Noche Reparadora", "price": 42.99, "quantity": 1 },
-        { "id": "17", "name": "Sérum de Jazmín", "price": 44.99, "quantity": 1 }
+        {
+          "id": "1",
+          "name": "Crema Hidratante Intensa",
+          "price": 29.99,
+          "quantity": 1
+        },
+        {
+          "id": "6",
+          "name": "Contorno de Ojos Antiarrugas",
+          "price": 39.99,
+          "quantity": 1
+        },
+        {
+          "id": "10",
+          "name": "Crema de Noche Reparadora",
+          "price": 42.99,
+          "quantity": 1
+        },
+        {
+          "id": "17",
+          "name": "Sérum de Jazmín",
+          "price": 44.99,
+          "quantity": 1
+        }
       ]
     }
   ]

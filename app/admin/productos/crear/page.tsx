@@ -40,17 +40,31 @@ export default function CreateProductPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al crear el producto");
+      // Cargar productos existentes desde localStorage o desde el JSON si no hay datos
+      let existingProducts: Product[] = [];
+      const cachedData = localStorage.getItem('saturn-products');
+      
+      if (cachedData) {
+        existingProducts = JSON.parse(cachedData);
+      } else {
+        // Si no hay datos en localStorage, cargamos del JSON
+        const response = await fetch("/data/products.json");
+        if (!response.ok) throw new Error("Error cargando productos");
+        const data = await response.json();
+        existingProducts = data.products;
       }
+
+      // Generar un ID único para el nuevo producto (usando timestamp)
+      const newProduct: Product = {
+        ...formData,
+        id: `${Date.now()}`, // Convertimos a string para mantener consistencia con el formato del JSON
+      };
+
+      // Añadir el nuevo producto al array existente
+      const updatedProducts = [...existingProducts, newProduct];
+      
+      // Guardar en localStorage
+      localStorage.setItem('saturn-products', JSON.stringify(updatedProducts));
 
       toast({
         title: "Éxito",
