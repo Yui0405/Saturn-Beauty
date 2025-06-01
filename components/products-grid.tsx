@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Grid3X3, List, Star, Heart, ChevronDown, ChevronUp } from "lucide-react";
+import { Grid3X3, List, Star, Heart, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -57,10 +57,14 @@ export default function ProductsGrid() {
   const [productsPerPage] = useState(12);
   const [minRating, setMinRating] = useState<number>(0);
   
-  // Estados para controlar el acordeón de filtros
-  const [categoryOpen, setCategoryOpen] = useState<boolean>(true);
-  const [priceOpen, setPriceOpen] = useState<boolean>(false);
-  const [popularityOpen, setPopularityOpen] = useState<boolean>(false);
+  // Estado para controlar la sección activa del acordeón
+  const [activeSection, setActiveSection] = useState<string | null>('categorias');
+  
+  // Función para alternar secciones del acordeón
+  const toggleSection = (section: string) => {
+    setActiveSection(activeSection === section ? null : section);
+  };
+
   const { addItem } = useCart();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -141,7 +145,7 @@ export default function ProductsGrid() {
       image: product.image 
         ? (product.image.startsWith('http') || product.image.startsWith('/') 
             ? product.image 
-            : `/images/products/${product.image}`)
+            : `${product.image}`)
         : '/images/placeholder-product.jpg',
       // Asegurarse de que el precio sea un número
       price: Number(product.price) || 0,
@@ -168,21 +172,21 @@ export default function ProductsGrid() {
     
     switch(priceRange) {
       case '0-20':
-        if (price > 20) return false;
-        break;
+        if (price >= 0 && price <= 20) return true;
+        return false;
       case '20-50':
-        if (price <= 20 || price > 50) return false;
-        break;
+        if (price > 20 && price <= 50) return true;
+        return false;
       case '50-100':
-        if (price <= 50 || price > 100) return false;
-        break;
+        if (price > 50 && price <= 100) return true;
+        return false;
       case '100+':
-        if (price <= 100) return false;
-        break;
+        if (price > 100) return true;
+        return false;
       case 'all':
       default:
         // No filtrar por precio
-        break;
+        return true;
     }
     
     // Filtrar por calificación mínima
@@ -227,11 +231,11 @@ export default function ProductsGrid() {
   const categories = [...new Set(products.map(p => p.category))];
 
   // Función para manejar el cambio de categorías
-  const handleCategoryChange = (category: string) => {
+  const toggleCategory = (category: string, checked: boolean) => {
     setSelectedCategories(prev => 
-      prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+      checked
+        ? [...prev, category]
+        : prev.filter(c => c !== category)
     );
     setCurrentPage(1); // Resetear a la primera página al cambiar filtros
   };
@@ -276,26 +280,26 @@ export default function ProductsGrid() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-8 relative">
         {/* Filtros en el sidebar */}
         <div className="w-full md:w-64 flex-shrink-0">
-          <div className="bg-white p-6 rounded-lg sticky top-4 space-y-6 shadow-sm border border-gray-100">
+          <div className="bg-white p-6 rounded-lg sticky top-4 space-y-6 shadow-sm border border-gray-100 transition-all duration-200 z-10">
             <h3 className="text-xl font-bold mb-6 text-mint-green-dark">Filtros</h3>
             
             {/* Categoría - Acordeón */}
             <div className="mb-4 border-b border-gray-200 pb-2">
               <div 
                 className="flex justify-between items-center cursor-pointer" 
-                onClick={() => setCategoryOpen(!categoryOpen)}
+                onClick={() => toggleSection('categorias')}
               >
                 <h3 className="font-semibold text-mint-green-dark">Categoría</h3>
-                {categoryOpen ? 
+                {activeSection === 'categorias' ? 
                   <ChevronUp className="h-4 w-4 text-gray-500" /> : 
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 }
               </div>
               
-              {categoryOpen && (
+              {activeSection === 'categorias' && (
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center space-x-2">
                     <Checkbox 
@@ -338,16 +342,16 @@ export default function ProductsGrid() {
             <div className="mb-4 border-b border-gray-200 pb-2">
               <div 
                 className="flex justify-between items-center cursor-pointer" 
-                onClick={() => setPriceOpen(!priceOpen)}
+                onClick={() => toggleSection('precio')}
               >
                 <h3 className="font-semibold text-mint-green-dark">Precio</h3>
-                {priceOpen ? 
+                {activeSection === 'precio' ? 
                   <ChevronUp className="h-4 w-4 text-gray-500" /> : 
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 }
               </div>
               
-              {priceOpen && (
+              {activeSection === 'precio' && (
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center space-x-2">
                     <input
@@ -422,87 +426,49 @@ export default function ProductsGrid() {
             <div className="mb-4 border-b border-gray-200 pb-2">
               <div 
                 className="flex justify-between items-center cursor-pointer" 
-                onClick={() => setPopularityOpen(!popularityOpen)}
+                onClick={() => toggleSection('popularidad')}
               >
                 <h3 className="font-semibold text-mint-green-dark">Popularidad</h3>
-                {popularityOpen ? 
+                {activeSection === 'popularidad' ? 
                   <ChevronUp className="h-4 w-4 text-gray-500" /> : 
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 }
               </div>
               
-              {popularityOpen && (
-                <div className="space-y-2 mt-3">
-                  <div className="flex items-center justify-between">
-                    <input
-                      type="checkbox"
-                      id="pop-alta"
-                      checked={minRating >= 4}
-                      onChange={() => setMinRating(minRating >= 4 ? 0 : 4)}
-                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
-                    />
-                    <Label htmlFor="pop-alta" className="flex-1 ml-2">
-                      Alta
-                    </Label>
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star 
-                          key={star}
-                          className={`h-4 w-4 ${star <= 5 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                        />
-                      ))}
+              {activeSection === 'popularidad' && (
+                <div className="space-y-4 mt-3">
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-700">Calificación mínima</span>
+                      <span className="text-sm font-medium text-mint-green-dark">{minRating} estrella{minRating !== 1 ? 's' : ''}</span>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <input
-                      type="checkbox"
-                      id="pop-media"
-                      checked={minRating >= 3 && minRating < 4}
-                      onChange={() => setMinRating(minRating >= 3 && minRating < 4 ? 0 : 3)}
-                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
-                    />
-                    <Label htmlFor="pop-media" className="flex-1 ml-2">
-                      Media
-                    </Label>
-                    <div className="flex">
-                      {[1, 2, 3].map((star) => (
-                        <Star 
-                          key={star}
-                          className="h-4 w-4 text-yellow-400 fill-yellow-400"
-                        />
-                      ))}
-                      {[4, 5].map((star) => (
-                        <Star 
-                          key={star}
-                          className="h-4 w-4 text-gray-300"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <input
-                      type="checkbox"
-                      id="pop-baja"
-                      checked={minRating > 0 && minRating < 3}
-                      onChange={() => setMinRating(minRating > 0 && minRating < 3 ? 0 : 2)}
-                      className="h-4 w-4 rounded border-gray-300 text-[#7ec9a8] focus:ring-[#7ec9a8]"
-                    />
-                    <Label htmlFor="pop-baja" className="flex-1 ml-2">
-                      Baja
-                    </Label>
-                    <div className="flex">
-                      {[1, 2].map((star) => (
-                        <Star 
-                          key={star}
-                          className="h-4 w-4 text-yellow-400 fill-yellow-400"
-                        />
-                      ))}
-                      {[3, 4, 5].map((star) => (
-                        <Star 
-                          key={star}
-                          className="h-4 w-4 text-gray-300"
-                        />
-                      ))}
+                    
+                    <div className="flex items-center justify-center py-2">
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star}
+                            className={`h-6 w-6 mx-1 ${star <= minRating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} cursor-pointer hover:scale-110 transition-transform`}
+                            onClick={() => {
+                              // Solo establecer la calificación, nunca limpiar al hacer clic
+                              if (star > minRating) {
+                                setMinRating(star);
+                              } else if (star < minRating) {
+                                setMinRating(star);
+                              }
+                              // Si star === minRating, no hacer nada (mantener la selección)
+                            }}
+                            onMouseEnter={(e) => {
+                              // Efecto visual al pasar el mouse sobre las estrellas
+                              e.currentTarget.classList.add('scale-110');
+                            }}
+                            onMouseLeave={(e) => {
+                              // Restaurar tamaño normal al quitar el mouse
+                              e.currentTarget.classList.remove('scale-110');
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -527,7 +493,7 @@ export default function ProductsGrid() {
         </div>
 
         {/* Contenido principal */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Controles de vista y ordenación */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
             <div className="flex items-center gap-2">
@@ -575,10 +541,6 @@ export default function ProductsGrid() {
                     key={product.id}
                     className="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
                   >
-                    {/* Badge Nuevo */}
-                    <div className="absolute top-3 right-3 bg-mint-green text-white text-xs font-medium px-2 py-1 rounded-md z-10">
-                      Nuevo
-                    </div>
                     
                     {/* Imagen del producto */}
                     <div className="relative pt-[100%] bg-gray-50">
@@ -624,21 +586,30 @@ export default function ProductsGrid() {
                         {product.name}
                       </h3>
                       
-                      {/* Valoración */}
-                      <div className="flex items-center mb-3">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                            />
-                          ))}
+                      {/* Valoración y Precio */}
+                      <div className="mb-3">
+                        <div className="flex items-center mb-1">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">({product.rating})</span>
                         </div>
-                        <span className="text-xs text-gray-500 ml-1">({product.rating})</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          {new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD',
+                            minimumFractionDigits: 2
+                          }).format(product.price)}
+                        </span>
                       </div>
                       
-                      {/* Precio y botón */}
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                      {/* Botón de añadir al carrito */}
+                      <div className="mt-4 pt-3 border-t border-gray-100">
                         <Button 
                           onClick={(e) => {
                             e.stopPropagation();
@@ -650,38 +621,10 @@ export default function ProductsGrid() {
                               quantity: 1
                             });
                           }}
-                          className="bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium px-3 py-1 h-8 text-xs"
+                          className="w-full bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium h-9"
                         >
                           Añadir al carrito
                         </Button>
-                        <span className="text-base font-bold text-gray-900">
-                          {new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: 'USD',
-                            minimumFractionDigits: 2
-                          }).format(product.price)}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (isInWishlist(parseInt(product.id))) {
-                              removeFromWishlist(parseInt(product.id));
-                            } else {
-                              addToWishlist({
-                                id: parseInt(product.id),
-                                name: product.name,
-                                price: product.price,
-                                image: product.image
-                              });
-                            }
-                          }}
-                          className="p-1 rounded-full hover:bg-gray-100"
-                          aria-label={isInWishlist(parseInt(product.id)) ? 'Quitar de favoritos' : 'Añadir a favoritos'}
-                        >
-                          <Heart 
-                            className={`h-5 w-5 ${isInWishlist(parseInt(product.id)) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
-                          />
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -701,17 +644,10 @@ export default function ProductsGrid() {
                     
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-2">
-                        <h3 className="text-xl font-medium text-gray-900 mb-1">
+                        <h3 className="text-xl font-medium text-mint-green-dark mb-1">
                           {product.name}
                         </h3>
-                        <div className="flex flex-col items-end">
-                          <span className="text-xl font-bold text-gray-900 whitespace-nowrap">
-                            {new Intl.NumberFormat('en-US', {
-                              style: 'currency',
-                              currency: 'USD',
-                              minimumFractionDigits: 2
-                            }).format(product.price)}
-                          </span>
+                        <div className="flex items-end">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -726,7 +662,7 @@ export default function ProductsGrid() {
                                 });
                               }
                             }}
-                            className="p-1 rounded-full hover:bg-gray-100 transition-colors mt-1"
+                            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                             aria-label={isInWishlist(parseInt(product.id)) ? 'Quitar de favoritos' : 'Añadir a favoritos'}
                           >
                             <Heart 
@@ -740,9 +676,17 @@ export default function ProductsGrid() {
                         {product.category}
                       </span>
                       
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                         {product.description}
                       </p>
+                      
+                      <span className="text-xl font-bold text-gray-900 mb-4 block">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: 'USD',
+                          minimumFractionDigits: 2
+                        }).format(product.price)}
+                      </span>
                       
                       <div className="mt-auto pt-3 border-t border-gray-100">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -783,67 +727,60 @@ export default function ProductsGrid() {
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-500">No se encontraron productos que coincidan con los filtros seleccionados.</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => {
-                  setSelectedCategories([]);
-                  setPriceRange('all');
-                  setMinRating(0);
-                }}
-              >
-                Limpiar filtros
-              </Button>
             </div>
           )}
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex justify-center mt-8 space-x-2">
-              <Button
-                onClick={() => paginate(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                variant="outline"
-                className="w-10 h-10 p-0"
-              >
-                «
-              </Button>
-              
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                // Mostrar siempre 5 números de página, centrados en la página actual
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                
-                return (
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-8 pt-4 border-t border-gray-200">
+              <div className="flex items-center gap-2 mb-4 sm:mb-0">
+                <p className="text-sm text-gray-600">
+                  Página {currentPage} de {totalPages}
+                </p>
+                <p className="text-sm text-gray-500">
+                  ({(currentPage - 1) * productsPerPage + 1}-
+                  {Math.min(currentPage * productsPerPage, filteredProducts.length)} de{" "}
+                  {filteredProducts.length} productos)
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex space-x-2">
                   <Button
-                    key={pageNum}
-                    onClick={() => paginate(pageNum)}
-                    variant={currentPage === pageNum ? 'default' : 'outline'}
-                    className={`w-10 h-10 p-0 ${
-                      currentPage === pageNum ? 'bg-mint-green hover:bg-accent-green' : ''
-                    }`}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => paginate(1)}
+                    disabled={currentPage === 1}
+                    className="hidden sm:flex"
                   >
-                    {pageNum}
+                    Primera
                   </Button>
-                );
-              })}
-              
-              <Button
-                onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                variant="outline"
-                className="w-10 h-10 p-0"
-              >
-                »
-              </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => paginate(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => paginate(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="hidden sm:flex"
+                  >
+                    Última
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>

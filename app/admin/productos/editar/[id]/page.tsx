@@ -34,13 +34,27 @@ export default function EditarProductoPage({
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch("/data/products.json");
-        const data = await response.json();
-        const product = data.products.find((p: Product) => p.id === params.id);
+        setIsLoading(true);
+        let foundProduct: Product | undefined;
+        
+        // 1. Buscar primero en localStorage
+        const cachedData = localStorage.getItem('saturn-products');
+        if (cachedData) {
+          const products = JSON.parse(cachedData);
+          foundProduct = products.find((p: Product) => p.id === params.id);
+        }
+        
+        // 2. Si no se encuentra, buscar en el JSON
+        if (!foundProduct) {
+          const response = await fetch("/data/products.json");
+          const data = await response.json();
+          foundProduct = data.products.find((p: Product) => p.id === params.id);
+        }
 
-        if (product) {
-          setProduct(product);
-          setPreviewImage(product.image);
+        if (foundProduct) {
+          setProduct(foundProduct);
+          // Asegurarse de que siempre haya una imagen de vista previa
+          setPreviewImage(foundProduct.image || "/placeholder-product.jpg");
         } else {
           toast({
             title: "Error",

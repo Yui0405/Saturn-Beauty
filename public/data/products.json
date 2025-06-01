@@ -174,7 +174,7 @@
       "category": "Cuidado",
       "price": 29.99,
       "stock": 35,
-      "image": "/images/products/photo_2025-05-22_00-34-14.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-04.jpg"
     },
     {
       "id": "17",
@@ -185,7 +185,7 @@
       "category": "Cuidado",
       "price": 44.99,
       "stock": 25,
-      "image": "/images/products/photo_2025-05-22_00-34-16.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-08.jpg"
     },
     {
       "id": "18",
@@ -196,7 +196,7 @@
       "category": "Cuidado",
       "price": 49.99,
       "stock": 15,
-      "image": "/images/products/photo_2025-05-22_00-34-18.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-12.jpg"
     },
     {
       "id": "19",
@@ -207,7 +207,7 @@
       "category": "Cuidado",
       "price": 49.99,
       "stock": 20,
-      "image": "/images/products/photo_2025-05-22_00-34-20.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-02.jpg"
     },
     {
       "id": "20",
@@ -218,7 +218,7 @@
       "category": "Cuidado",
       "price": 19.99,
       "stock": 40,
-      "image": "/images/products/photo_2025-05-22_00-34-22.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-02.jpg"
     },
     {
       "id": "21",
@@ -229,7 +229,7 @@
       "category": "Cuidado",
       "price": 17.99,
       "stock": 45,
-      "image": "/images/products/photo_2025-05-22_00-34-24.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-02.jpg"
     },
     {
       "id": "22",
@@ -240,7 +240,7 @@
       "category": "Cuidado",
       "price": 29.99,
       "stock": 35,
-      "image": "/images/products/photo_2025-05-22_00-34-26.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-02.jpg"
     },
     {
       "id": "23",
@@ -251,7 +251,7 @@
       "category": "Cuidado",
       "price": 34.99,
       "stock": 25,
-      "image": "/images/products/photo_2025-05-22_00-34-28.jpg"
+      "image": "/images/products/photo_2025-05-22_00-34-02.jpg"
     },
     {
       "id": "24",
@@ -262,7 +262,7 @@
       "category": "Cuidado",
       "price": 49.99,
       "stock": 15,
-      "image": "/images/products/photo_2025-05-22_00-34-30.jpg"
+      "image": "/images/products/photo_2025-05-22_00-33-37.jpg"
     }
   ]
 }
