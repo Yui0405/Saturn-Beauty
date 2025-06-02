@@ -46,6 +46,7 @@ export function AdminForm({
             type="button"
             variant="outline"
             onClick={() => router.push(backUrl)}
+            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
           >
             Cancelar
           </Button>{" "}

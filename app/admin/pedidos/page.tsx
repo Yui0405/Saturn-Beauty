@@ -50,11 +50,28 @@ export default function PedidosPage() {
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/data/orders.json");
-      if (!response.ok) throw new Error("Error cargando pedidos");
+      
+      // Primero intentamos cargar desde localStorage
+      const cachedData = localStorage.getItem('saturn-orders');
+      
+      if (cachedData) {
+        // Si hay datos en localStorage, los usamos
+        const parsedData = JSON.parse(cachedData);
+        setOrders(parsedData);
+        console.log('Pedidos cargados desde localStorage:', parsedData.length);
+      } else {
+        // Si no hay datos en localStorage, cargamos del JSON
+        const response = await fetch("/data/orders.json");
+        if (!response.ok) throw new Error("Error cargando pedidos");
 
-      const data = await response.json();
-      setOrders(data.orders);
+        const data = await response.json();
+        setOrders(data.orders);
+        
+        // Guardamos en localStorage para futuras cargas
+        localStorage.setItem('saturn-orders', JSON.stringify(data.orders));
+        console.log('Pedidos cargados desde JSON y guardados en localStorage');
+      }
+      
       setError(null);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -103,8 +120,11 @@ export default function PedidosPage() {
 
       // Optimistic update
       setOrders(updatedOrders);
+      
+      // Save to localStorage
+      localStorage.setItem('saturn-orders', JSON.stringify(updatedOrders));
 
-      // Persist changes
+      // Persist changes to JSON file
       await saveOrdersToFile(updatedOrders);
 
       toast({
@@ -114,6 +134,8 @@ export default function PedidosPage() {
     } catch (error) {
       // Revert on error
       setOrders(previousOrders);
+      // Restore to localStorage on error
+      localStorage.setItem('saturn-orders', JSON.stringify(previousOrders));
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado del pedido",
@@ -161,12 +183,15 @@ export default function PedidosPage() {
       accessorKey: "status",
       cell: ({ row }: { row: Order }) => (
         <Select
-          defaultValue={row.status}
+          value={row.status}
           onValueChange={(value: Order["status"]) =>
             handleStatusChange(row.id, value)
           }
+          disabled={row.status === 'entregado'}
         >
-          <SelectTrigger className={`w-[140px] ${statusColors[row.status]}`}>
+          <SelectTrigger 
+            className={`w-[140px] ${statusColors[row.status]} ${row.status === 'entregado' ? 'opacity-100 cursor-default' : ''}`}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

@@ -117,7 +117,7 @@ export default function CreateProductPage() {
     setErrors(newErrors);
     return Object.values(newErrors).every(error => error === '');
   };
-  const [previewImage, setPreviewImage] = useState("/placeholder.jpg");
+  const [previewImage, setPreviewImage] = useState("/images/placeholder.svg");
 
   // Mark all fields as touched when form is submitted
   const markAllAsTouched = () => {

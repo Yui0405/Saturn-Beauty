@@ -154,7 +154,7 @@ export default function EditarProductoPage({
         if (foundProduct) {
           setProduct(foundProduct);
           // Asegurarse de que siempre haya una imagen de vista previa
-          setPreviewImage(foundProduct.image || "/images/placeholder-product.jpg");
+          setPreviewImage(foundProduct.image || "/images/placeholder.svg");
         } else {
           toast({
             title: "Error",

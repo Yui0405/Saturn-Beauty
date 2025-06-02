@@ -19,6 +19,7 @@ export interface User {
   joinDate: string;
   lastLogin: string;
   createdAt?: string; // Mantener para compatibilidad
+  updatedAt?: string; // Track when user was last updated
 }
 
 // Función auxiliar para cargar usuarios iniciales si no existen
