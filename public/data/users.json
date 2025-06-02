@@ -7,6 +7,9 @@
       "role": "admin",
       "name": "Lisbeth Márquez",
       "bio": "Administradora principal de la tienda",
+      "telefono": "+1234567890",
+      "direccion": "Av. Principal #123, Ciudad",
+      "password": "Qwerty04*+",
       "avatar": "/images/users/User1.webp",
       "joinDate": "2023-01-15T00:00:00Z",
       "lastLogin": "2023-05-30T14:30:00Z"
@@ -18,7 +21,10 @@
       "role": "user",
       "name": "Carlos López",
       "bio": "Cliente frecuente",
-      "avatar": "/images/users/User2.jpg",
+      "telefono": "+1234567891",
+      "direccion": "Av. Principal #123, Ciudad",
+      "password": "Carlos1234+*",
+      "avatar": "/images/users/User2.webp",
       "joinDate": "2023-02-20T00:00:00Z",
       "lastLogin": "2023-05-29T10:15:00Z"
     },
@@ -29,6 +35,9 @@
       "role": "user",
       "name": "María Rodríguez",
       "bio": "Amante de los productos naturales",
+      "telefono": "+1234567892",
+      "direccion": "Av. Principal #123, Ciudad",
+      "password": "Maria1234+*",
       "avatar": "/images/users/User3.jpg",
       "joinDate": "2023-03-10T00:00:00Z",
       "lastLogin": "2023-05-30T16:45:00Z"
@@ -40,6 +49,9 @@
       "role": "user",
       "name": "Juan Martínez",
       "bio": "Nuevo en el cuidado de la piel",
+      "telefono": "+1234567893",
+      "direccion": "Av. Principal #123, Ciudad",
+      "password": "Juan2234+*",
       "avatar": "/images/users/User4.jpg",
       "joinDate": "2023-04-05T00:00:00Z",
       "lastLogin": "2023-05-28T11:20:00Z"
@@ -51,6 +63,9 @@
       "role": "user",
       "name": "Laura Sánchez",
       "bio": "Entusiasta de la cosmética coreana",
+      "telefono": "+1234567894",
+      "direccion": "Calle 80 #12-34",
+      "password": "Laura2234+*",
       "avatar": "/images/users/User5.jpg",
       "joinDate": "2023-05-15T00:00:00Z",
       "lastLogin": "2023-05-30T09:10:00Z"
@@ -62,6 +77,9 @@
       "role": "user",
       "name": "Ana García",
       "bio": "Experta en maquillaje",
+      "telefono": "+1234567895",
+      "direccion": "Carrera 10 #20-30, Ciudad",
+      "password": "Ana2234+*",
       "avatar": "/images/users/User1.jpg",
       "joinDate": "2023-04-10T00:00:00Z",
       "lastLogin": "2023-05-29T10:15:00Z"
@@ -73,6 +91,9 @@
       "role": "user",
       "name": "Pablo Gómez",
       "bio": "Novato en el cuidado de la piel",
+      "telefono": "+1234567896",
+      "direccion": "Calle 30 #40-50, Ciudad",
+      "password": "Pablo2234+*",
       "avatar": "/images/users/User2.jpg",
       "joinDate": "2023-05-05T00:00:00Z",
       "lastLogin": "2023-05-30T16:45:00Z"
@@ -84,6 +105,9 @@
       "role": "user",
       "name": "Luisa Rodríguez",
       "bio": "Enamorada de los productos de belleza",
+      "telefono": "+1234567897",
+      "direccion": "Av. Las Flores #45-67, Ciudad",
+      "password": "Luisa2234+*",
       "avatar": "/images/users/User3.jpg",
       "joinDate": "2023-03-15T00:00:00Z",
       "lastLogin": "2023-05-28T11:20:00Z"
@@ -95,6 +119,9 @@
       "role": "user",
       "name": "Francisco Martínez",
       "bio": "Entrenador de fitness",
+      "telefono": "+1234567898",
+      "direccion": "Carrera 5 #10-15, Ciudad",
+      "password": "Francisco2234+*",
       "avatar": "/images/users/User4.jpg",
       "joinDate": "2023-04-20T00:00:00Z",
       "lastLogin": "2023-05-30T09:10:00Z"
@@ -106,6 +133,9 @@
       "role": "user",
       "name": "Inés Sánchez",
       "bio": "Influencer de belleza",
+      "telefono": "+1234567899",
+      "direccion": "Calle 100 #20-30, Ciudad",
+      "password": "Ines2234+*",
       "avatar": "/images/users/User5.jpg",
       "joinDate": "2023-05-20T00:00:00Z",
       "lastLogin": "2023-05-30T09:10:00Z"
@@ -117,6 +147,9 @@
       "role": "user",
       "name": "María Pérez",
       "bio": "Estudiante de farmacia",
+      "telefono": "+1234567800",
+      "direccion": "Carrera 15 #25-35, Ciudad",
+      "password": "Maria2234+*",
       "avatar": "/images/users/User1.jpg",
       "joinDate": "2023-04-25T00:00:00Z",
       "lastLogin": "2023-05-29T10:15:00Z"
@@ -128,6 +161,9 @@
       "role": "user",
       "name": "Juan Carlos",
       "bio": "Due o de una tienda de productos de belleza",
+      "telefono": "+1234567801",
+      "direccion": "Av. Comercial #50-60, Ciudad",
+      "password": "Juan2234+*",
       "avatar": "/images/users/User2.jpg",
       "joinDate": "2023-05-10T00:00:00Z",
       "lastLogin": "2023-05-30T16:45:00Z"
@@ -139,6 +175,9 @@
       "role": "user",
       "name": "Claudia Gutiérrez",
       "bio": "Blogger de belleza",
+      "telefono": "+1234567802",
+      "direccion": "Carrera 20 #30-40, Ciudad",
+      "password": "Claudia2234+*",
       "avatar": "/images/users/User3.jpg",
       "joinDate": "2023-03-20T00:00:00Z",
       "lastLogin": "2023-05-28T11:20:00Z"
@@ -150,6 +189,9 @@
       "role": "user",
       "name": "Antonio López",
       "bio": "Estudiante de marketing",
+      "telefono": "+1234567803",
+      "direccion": "Calle 40 #50-60, Ciudad",
+      "password": "Antonio2234+*",
       "avatar": "/images/users/User4.jpg",
       "joinDate": "2023-04-15T00:00:00Z",
       "lastLogin": "2023-05-30T09:10:00Z"
@@ -161,6 +203,9 @@
       "role": "user",
       "name": "Rosa Huertas",
       "bio": "Dermatóloga y consultora de belleza",
+      "telefono": "+1234567804",
+      "direccion": "Av. Principal #100-200, Ciudad",
+      "password": "Rosa2234+*",
       "avatar": "/images/users/User5.jpg",
       "joinDate": "2023-05-25T00:00:00Z",
       "lastLogin": "2023-05-30T09:10:00Z"

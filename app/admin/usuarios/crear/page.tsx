@@ -5,32 +5,60 @@ import { useRouter } from "next/navigation";
 import { AdminForm } from "@/components/ui/admin-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { createUser } from "@/lib/user-service";
-import { Textarea } from "@/components/ui/textarea";
-
-const roles = ["user", "admin"];
+import Image from "next/image";
 
 export default function CreateUserPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState("/placeholder.svg");
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user" as "admin" | "user",
-    avatar: null as File | null,
     name: "",
-    bio: "",
+    phone: "",
+    address: "",
+    avatar: ""
   });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validar tamaño (máximo 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "La imagen no debe superar los 2MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validar tipo de archivo
+      const validTypes = ["image/jpeg", "image/png"];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Error",
+          description: "Por favor sube una imagen en formato JPG o PNG",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Crear vista previa
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+        setFormData(prev => ({
+          ...prev,
+          avatar: reader.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -47,7 +75,7 @@ export default function CreateUserPage() {
         return;
       }
 
-      if (!formData.password || formData.password.length < 8) {
+      if (formData.password.length < 8) {
         toast({
           title: "Error",
           description: "La contraseña debe tener al menos 8 caracteres.",
@@ -57,12 +85,21 @@ export default function CreateUserPage() {
         return;
       }
 
-      // Obtener usuarios actuales
-      const response = await fetch("/data/users.json");
-      const { users } = await response.json();
+      // Cargar usuarios existentes desde localStorage o JSON
+      let existingUsers = [];
+      const cachedData = localStorage.getItem('saturn-users');
+      
+      if (cachedData) {
+        existingUsers = JSON.parse(cachedData);
+      } else {
+        const response = await fetch("/data/users.json");
+        if (!response.ok) throw new Error("Error cargando usuarios");
+        const data = await response.json();
+        existingUsers = data.users;
+      }
 
-      // Verificar usuario/email duplicado
-      const userExists = users.some(
+      // Verificar si el usuario/email ya existe
+      const userExists = existingUsers.some(
         (u: { username: string; email: string }) =>
           u.username === formData.username || u.email === formData.email
       );
@@ -77,34 +114,44 @@ export default function CreateUserPage() {
         return;
       }
 
-      // Crear nuevo usuario
+      // Crear nuevo usuario con todos los campos necesarios
+      const newUserId = (Math.max(0, ...existingUsers.map((u: { id: string }) => parseInt(u.id) || 0)) + 1).toString();
+      
       const newUser = {
-        id: (
-          Math.max(...users.map((u: { id: string }) => parseInt(u.id)), 0) + 1
-        ).toString(),
-        username: formData.username,
-        email: formData.email,
+        id: newUserId,
+        username: formData.username.trim(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password, // En una app real esto se hashearía
-        role: formData.role,
-        name: formData.name,
-        bio: formData.bio || "",
-        avatar: "/placeholder.svg",
-        createdAt: new Date().toISOString(),
-      }; // Actualizar el JSON a través de la API
-      const updatedUsers = [...users, newUser];
-      const saveResponse = await fetch("/api/users", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ users: updatedUsers }),
+        role: 'user',
+        name: formData.name.trim(),
+        bio: "",
+        telefono: "",
+        direccion: "",
+        avatar: formData.avatar || "/placeholder.svg",
+        joinDate: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
+      };
+      
+      // Agregar el nuevo usuario a la lista
+      const updatedUsers = [...existingUsers, newUser];
+      
+      // Guardar en localStorage con formato correcto
+      localStorage.setItem('saturn-users', JSON.stringify(updatedUsers, null, 2));
+      
+      // Mostrar mensaje de éxito
+      toast({
+        title: "¡Usuario creado!",
+        description: `El usuario ${newUser.username} ha sido registrado exitosamente.`,
       });
+      
+      // Redirigir a la lista de usuarios después de 1 segundo
+      setTimeout(() => {
+        router.push('/admin/usuarios');
+      }, 1000);
 
-      if (!saveResponse.ok) {
-        throw new Error("Error al guardar el usuario");
-      }
 
-      await router.push("/admin/usuarios");
+      // Redirigir a la lista de usuarios
+      router.push("/admin/usuarios");
 
       toast({
         title: "Usuario creado",
@@ -161,19 +208,7 @@ export default function CreateUserPage() {
             }
             required
           />
-        </div>{" "}
-        {formData.role === "user" && (
-          <div>
-            <Label htmlFor="bio">Biografía (opcional)</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
-            />
-          </div>
-        )}
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="password">Contraseña</Label>
@@ -203,95 +238,31 @@ export default function CreateUserPage() {
             />
           </div>
         </div>
-        <div>
-          <Label htmlFor="role">Rol</Label>
-          <Select
-            value={formData.role}
-            onValueChange={(value) =>
-              setFormData({ ...formData, role: value as "admin" | "user" })
-            }
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Seleccionar rol" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {roles.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="avatar">Imagen de Perfil (opcional)</Label>
-          <Input
-            id="avatar"
-            type="file"
-            accept="image/*"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                // Validate file size (max 2MB)
-                if (file.size > 2 * 1024 * 1024) {
-                  toast({
-                    title: "Error",
-                    description: "La imagen no debe superar los 2MB",
-                    variant: "destructive",
-                  });
-                  return;
-                }
 
-                // Validate file type
-                const validTypes = ["image/jpeg", "image/png"];
-                if (!validTypes.includes(file.type)) {
-                  toast({
-                    title: "Error",
-                    description:
-                      "Por favor sube una imagen en formato JPG o PNG",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-
-                try {
-                  const formData = new FormData();
-                  formData.append("file", file);
-
-                  const uploadResponse = await fetch("/api/upload", {
-                    method: "POST",
-                    body: formData,
-                  });
-
-                  if (!uploadResponse.ok) {
-                    throw new Error("Error al subir la imagen");
-                  }
-
-                  const { path: imagePath } = await uploadResponse.json();
-                  setFormData((prev) => ({
-                    ...prev,
-                    avatar: imagePath,
-                  }));
-
-                  toast({
-                    title: "Éxito",
-                    description: "Imagen subida correctamente",
-                  });
-                } catch (error) {
-                  console.error("Error uploading image:", error);
-                  toast({
-                    title: "Error",
-                    description: "No se pudo subir la imagen",
-                    variant: "destructive",
-                  });
-                }
-              }
-            }}
-            className="cursor-pointer"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Formatos aceptados: JPEG, PNG. Tamaño máximo: 2MB
-          </p>
+        <div className="space-y-2">
+          <Label>Imagen de Perfil</Label>
+          <div className="flex items-center gap-4">
+            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
+              <Image
+                src={previewImage}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <Input
+                id="avatar"
+                type="file"
+                accept="image/jpeg,image/png"
+                onChange={handleImageChange}
+                className="cursor-pointer"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Formatos: JPG, PNG. Máx. 2MB
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </AdminForm>

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { AdminDataTable } from "@/components/ui/admin-data-table";
 import { toast } from "@/hooks/use-toast";
 import { readUsers, deleteUser, type User } from "@/lib/user-service";
+import { LuPlus } from "react-icons/lu";
 
 const columns = [
   {
@@ -31,9 +33,9 @@ const columns = [
   },
   {
     header: "Fecha de Registro",
-    accessorKey: "createdAt",
+    accessorKey: "joinDate",
     cell: ({ row }: { row: User }) =>
-      new Date(row.createdAt).toLocaleDateString(),
+      new Date(row.joinDate).toLocaleDateString(),
   },
 ];
 
@@ -50,34 +52,81 @@ export default function UsuariosPage() {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
-      // Primero intentar cargar del archivo JSON
-      const response = await fetch("/data/users.json");
-      if (!response.ok) throw new Error("Error cargando usuarios");
-
-      const data = await response.json();
-      setUsers(data.users);
-
-      // Actualizar localStorage con los datos del JSON
-      if (typeof window !== "undefined") {
-        localStorage.setItem("users", JSON.stringify(data.users));
+      
+      // 1. Primero intentar cargar desde localStorage
+      let usersData: User[] = [];
+      const storedUsers = localStorage.getItem('saturn-users');
+      
+      if (storedUsers) {
+        // Si hay datos en localStorage, usarlos
+        usersData = JSON.parse(storedUsers);
+      } else {
+        // 2. Si no hay datos en localStorage, cargar desde el archivo JSON
+        const response = await fetch("/data/users.json");
+        if (!response.ok) throw new Error("Error cargando usuarios desde el archivo");
+        
+        const data = await response.json();
+        usersData = data.users || [];
+        
+        // Guardar en localStorage para futuras cargas
+        localStorage.setItem('saturn-users', JSON.stringify(usersData));
       }
-
+      
+      // Asegurarse de que los datos tengan el formato correcto
+      const formattedUsers = usersData.map(user => ({
+        id: user.id,
+        username: user.username || '',
+        email: user.email || '',
+        role: (user.role === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
+        name: user.name || '',
+        avatar: user.avatar || '/placeholder.svg',
+        bio: user.bio || '',
+        telefono: user.telefono || '',
+        direccion: user.direccion || '',
+        password: user.password || '',
+        joinDate: user.joinDate || new Date().toISOString(),
+        lastLogin: user.lastLogin || new Date().toISOString(),
+        createdAt: user.createdAt || new Date().toISOString()
+      }));
+      
+      setUsers(formattedUsers);
       setError(null);
+      
+      // 3. Cargar en segundo plano desde el JSON para sincronizar (solo si no hay datos en localStorage)
+      if (!storedUsers) {
+        try {
+          const response = await fetch("/data/users.json?t=" + new Date().getTime());
+          if (response.ok) {
+            const data = await response.json();
+            if (data.users && data.users.length > 0) {
+              localStorage.setItem('saturn-users', JSON.stringify(data.users));
+              setUsers(data.users.map((user: any) => ({
+                ...user,
+                joinDate: user.joinDate || new Date().toISOString(),
+                role: user.role || 'user'
+              })));
+            }
+          }
+        } catch (syncError) {
+          console.warn("No se pudo sincronizar con el archivo JSON:", syncError);
+        }
+      }
+      
     } catch (err) {
       console.error("Error loading users:", err);
       setError(err as Error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los usuarios",
+        description: "No se pudieron cargar los usuarios. Mostrando datos locales.",
         variant: "destructive",
       });
-
-      // Si falla la carga del JSON, intentar cargar desde localStorage
+      
+      // Último intento: cargar datos iniciales
       try {
-        const data = readUsers();
-        setUsers(data);
-      } catch (localStorageErr) {
-        console.error("Error loading from localStorage:", localStorageErr);
+        const initialUsers = readUsers();
+        setUsers(initialUsers);
+      } catch (fallbackError) {
+        console.error("Error al cargar datos iniciales:", fallbackError);
       }
     } finally {
       setIsLoading(false);
@@ -113,7 +162,18 @@ export default function UsuariosPage() {
   };
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return (
+      <div className="p-4 bg-red-50 text-red-700 rounded-md">
+        <h2 className="font-bold">Error al cargar los usuarios</h2>
+        <p>{error.message}</p>
+        <button 
+          onClick={loadUsers}
+          className="mt-2 px-4 py-2 bg-red-100 hover:bg-red-200 rounded-md"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   if (isLoading) {
@@ -125,9 +185,9 @@ export default function UsuariosPage() {
           </h1>
           <p className="text-gray-600">Cargando usuarios...</p>
         </div>
-        <div className="animate-pulse">
+        <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((n) => (
-            <div key={n} className="h-16 bg-gray-100 mb-4 rounded"></div>
+            <div key={n} className="h-16 bg-gray-100 rounded-md"></div>
           ))}
         </div>
       </div>
@@ -135,8 +195,8 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="space-y-6">
+      <div className="space-y-2">
         <h1 className="text-3xl font-bold text-mint-green-dark">
           Gestionar Usuarios
         </h1>
@@ -145,15 +205,30 @@ export default function UsuariosPage() {
         </p>
       </div>
 
-      <AdminDataTable
-        columns={columns}
-        data={users}
-        onDelete={handleDelete}
-        createLink="/admin/usuarios/crear"
-        editPathPrefix="/admin/usuarios/editar"
-        searchPlaceholder="Buscar usuarios..."
-        itemsPerPage={10}
-      />
+      <div className="bg-white rounded-lg shadow-sm border p-4">
+        <AdminDataTable
+          columns={columns}
+          data={users}
+          onDelete={handleDelete}
+          createLink="/admin/usuarios/crear"
+          editPathPrefix="/admin/usuarios/editar"
+          searchPlaceholder="Buscar por nombre, email o rol..."
+          itemsPerPage={10}
+        />
+      </div>
+      
+      {users.length === 0 && (
+        <div className="text-center py-8 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">No se encontraron usuarios.</p>
+          <Link 
+            href="/admin/usuarios/crear"
+            className="mt-4 inline-flex items-center px-4 py-2 bg-mint-green text-white rounded-md hover:bg-accent-green transition-colors"
+          >
+            <LuPlus className="mr-2" />
+            Crear primer usuario
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

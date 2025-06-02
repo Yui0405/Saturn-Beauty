@@ -10,68 +10,80 @@ export interface User {
   username: string;
   email: string;
   role: "admin" | "user";
-  createdAt: string;
-  name?: string;
-  avatar?: string;
-  bio?: string;
+  name: string;
+  avatar: string;
+  bio: string;
+  telefono: string;
+  direccion: string;
   password: string;
+  joinDate: string;
+  lastLogin: string;
+  createdAt?: string; // Mantener para compatibilidad
 }
 
 // Función auxiliar para cargar usuarios iniciales si no existen
-const getInitialUsers = (): User[] => [
-  {
-    id: "1",
-    username: "lisbethAdmin",
-    email: "admin@saturnbeauty.com",
-    role: "admin",
-    name: "Lisbeth Administradora",
-    avatar: "/placeholder.svg",
-    bio: "Administradora principal de Saturn Beauty",
-    createdAt: "2024-01-01T00:00:00.000Z",
-    password: hashPassword("admin123"),
-  },
-  {
-    id: "2",
-    username: "maria.garcia",
-    email: "maria.garcia@example.com",
-    role: "user",
-    name: "María García",
-    avatar: "/placeholder.svg",
-    bio: "Amante de los cosméticos naturales",
-    createdAt: "2024-01-15T00:00:00.000Z",
-    password: hashPassword("user123"),
-  },
-  {
-    id: "3",
-    username: "ana.lopez",
-    email: "ana.lopez@example.com",
-    role: "user",
-    name: "Ana López",
-    avatar: "/placeholder.svg",
-    bio: "Experta en maquillaje",
-    createdAt: "2024-02-01T00:00:00.000Z",
-    password: hashPassword("user123"),
-  },
-];
+const getInitialUsers = (): User[] => {
+  try {
+    // Intentar cargar desde el archivo JSON primero
+    if (typeof window !== 'undefined') {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '/data/users.json', false); // Sincrónico
+      xhr.send();
+      
+      if (xhr.status === 200) {
+        const data = JSON.parse(xhr.responseText);
+        if (data?.users?.length > 0) {
+          return data.users;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error al cargar usuarios iniciales:', error);
+  }
+  
+  // Datos por defecto si no se puede cargar el archivo
+  return [
+    {
+      id: "1",
+      username: "lisbethAdmin",
+      email: "admin@saturnbeauty.com",
+      role: "admin" as const,
+      name: "Lisbeth Administradora",
+      avatar: "/images/users/User1.webp",
+      bio: "Administradora principal de Saturn Beauty",
+      telefono: "+1234567890",
+      direccion: "Av. Principal #123, Ciudad",
+      password: hashPassword("admin123"),
+      joinDate: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    }
+  ];
+};
 
 export function readUsers(): User[] {
   if (typeof window === "undefined") {
     return getInitialUsers();
   }
 
-  const storedUsers = localStorage.getItem("users");
+  const storedUsers = localStorage.getItem("saturn-users");
   if (!storedUsers) {
     const initialUsers = getInitialUsers();
-    localStorage.setItem("users", JSON.stringify(initialUsers));
+    localStorage.setItem("saturn-users", JSON.stringify(initialUsers));
     return initialUsers;
   }
 
-  return JSON.parse(storedUsers);
+  try {
+    return JSON.parse(storedUsers);
+  } catch (error) {
+    console.error("Error al analizar usuarios desde localStorage:", error);
+    return [];
+  }
 }
 
 export function writeUsers(users: User[]): void {
   if (typeof window !== "undefined") {
-    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("saturn-users", JSON.stringify(users));
   }
 }
 

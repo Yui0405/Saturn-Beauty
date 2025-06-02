@@ -31,9 +31,7 @@ export default function EditUserPage({ params }: Props) {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    role: "user" as "admin" | "user",
     name: "",
-    bio: "",
   });
 
   useEffect(() => {
@@ -49,9 +47,7 @@ export default function EditUserPage({ params }: Props) {
           setFormData({
             username: user.username,
             email: user.email,
-            role: user.role,
-            name: user.name || "",
-            bio: user.bio || "",
+            name: user.name || ""
           });
         } else {
           toast({
@@ -110,7 +106,9 @@ export default function EditUserPage({ params }: Props) {
         u.id === params.id
           ? {
               ...u,
-              ...formData,
+              username: formData.username,
+              email: formData.email,
+              name: formData.name,
               updatedAt: new Date().toISOString(),
             }
           : u
@@ -188,41 +186,6 @@ export default function EditUserPage({ params }: Props) {
             }
             required
           />
-        </div>{" "}
-        {formData.role === "user" && (
-          <div>
-            <Label htmlFor="bio">Biografía (opcional)</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) =>
-                setFormData({ ...formData, bio: e.target.value })
-              }
-              rows={3}
-              className="bg-white"
-              placeholder="Cuéntanos sobre ti..."
-            />
-          </div>
-        )}
-        <div>
-          <Label htmlFor="role">Rol</Label>
-          <Select
-            value={formData.role}
-            onValueChange={(value) =>
-              setFormData({ ...formData, role: value as "admin" | "user" })
-            }
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Seleccionar rol" />
-            </SelectTrigger>
-            <SelectContent>
-              {roles.map((role) => (
-                <SelectItem key={role} value={role}>
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
     </AdminForm>
