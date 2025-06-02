@@ -555,7 +555,9 @@ export default function ProductsGrid() {
                         id: parseInt(product.id),
                         name: product.name,
                         price: product.price,
-                        image: product.image
+                        image: product.image,
+                        rating: product.rating,
+                        category: product.category
                       });
                     }
                   }}

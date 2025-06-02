@@ -14,15 +14,15 @@ type Product = {
   price: number;
   rating: number;
   image: string;
-  skinType?: string;
-  category?: string;
-  stock?: number;
+  skinType: string;
+  category: string;
+  stock: number;
 };
 
 type ProductCardProps = {
   product: Product;
   className?: string;
-  variant?: 'default' | 'carousel';
+  variant?: 'default' | 'carousel' | 'list';
 };
 
 export default function ProductCard({ 
@@ -62,11 +62,109 @@ export default function ProductCard({
         id: productId,
         name: product.name,
         price: product.price,
-        image: product.image
+        image: product.image,
+        rating: product.rating,
+        category: product.category
       });
     }
   };
 
+  if (variant === 'list') {
+    return (
+      <div className={cn(
+        'relative flex flex-col sm:flex-row bg-white rounded-lg overflow-hidden border border-gray-100 transition-all duration-300',
+        'hover:shadow-md hover:-translate-y-0.5 hover:border-mint-green/30',
+        className
+      )}>
+        {/* Imagen del producto */}
+        <div className="relative w-full sm:w-48 h-48 sm:h-auto bg-gray-50 flex-shrink-0">
+          <Image
+            src={product.image || '/placeholder.svg'}
+            alt={product.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 192px"
+          />
+          {/* Botón de favoritos */}
+          <button
+            onClick={handleToggleWishlist}
+            className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10"
+            aria-label={isWishlisted ? "Quitar de favoritos" : "Añadir a favoritos"}
+          >
+            <Heart 
+              className={cn(
+                "h-4 w-4 transition-colors",
+                isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'
+              )} 
+            />
+          </button>
+        </div>
+        
+        {/* Contenido */}
+        <div className="flex flex-col flex-1 p-4">
+          <div className="flex-1">
+            {product.category && (
+              <span className="text-xs text-gray-500 font-medium">
+                {product.category}
+              </span>
+            )}
+            
+            <h3 className="font-medium text-mint-green-dark mt-1 text-lg">
+              {product.name}
+            </h3>
+            
+            <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+              {product.description}
+            </p>
+            
+            <div className="mt-3 flex items-center">
+              <div className="flex items-center mr-4">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-gray-500 ml-1">({product.rating})</span>
+              </div>
+              
+              <span className="text-lg font-bold text-gray-900">
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                  minimumFractionDigits: 2
+                }).format(product.price)}
+              </span>
+              
+              {product.stock > 0 ? (
+                <span className="ml-4 text-sm text-green-600">
+                  En stock ({product.stock} unidades)
+                </span>
+              ) : (
+                <span className="ml-4 text-sm text-amber-600">
+                  Agotado
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-4 pt-3 border-t border-gray-100 flex justify-end">
+            <Button 
+              onClick={handleAddToCart}
+              className="bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium h-9 px-6"
+              disabled={product.stock <= 0}
+            >
+              {product.stock > 0 ? 'Añadir al carrito' : 'No disponible'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Vista de cuadrícula (por defecto)
   return (
     <div 
       className={cn(
@@ -137,6 +235,16 @@ export default function ProductCard({
               minimumFractionDigits: 2
             }).format(product.price)}
           </span>
+          
+          {product.stock > 0 ? (
+            <div className="text-xs text-green-600 mt-1">
+              En stock ({product.stock} unidades)
+            </div>
+          ) : (
+            <div className="text-xs text-amber-600 mt-1">
+              Agotado
+            </div>
+          )}
         </div>
         
         {/* Botón de añadir al carrito */}
@@ -144,8 +252,9 @@ export default function ProductCard({
           <Button 
             onClick={handleAddToCart}
             className="w-full bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium h-9"
+            disabled={product.stock <= 0}
           >
-            Añadir al carrito
+            {product.stock > 0 ? 'Añadir al carrito' : 'No disponible'}
           </Button>
         </div>
       </div>

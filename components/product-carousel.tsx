@@ -111,8 +111,8 @@ export default function ProductCarousel() {
   const showPrevButton = currentIndex > 0;
 
   return (
-    <div className="relative max-w-5xl mx-auto px-4">
-      <h2 className="section-title mb-4 text-2xl font-playfair">Productos Destacados</h2>
+    <div className="relative max-w-7xl mx-auto px-8 py-10">
+      <h2 className="section-title mb-8 text-4xl font-playfair">Productos Destacados</h2>
 
       <div className="relative -mx-1">
         {isLoading ? (

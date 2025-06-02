@@ -407,8 +407,8 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                         <ProductCard 
                           product={{
                             ...item,
-                            rating: item.rating || 4.5,
-                            category: item.category || '',
+                            rating: item.rating,
+                            category: item.category,
                           }}
                           className="h-full"
                         />
