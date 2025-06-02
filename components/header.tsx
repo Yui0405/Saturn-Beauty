@@ -32,17 +32,23 @@ import NotificationsPanel from "@/components/notifications-panel";
 import { useNotifications } from "@/contexts/notification-context";
 import { useAuth } from "@/lib/auth";
 
-// Obtener la foto de perfil del usuario (simulado)
-const getUserAvatar = () => {
-  // En una aplicación real, esto vendría de un contexto de autenticación
-  // o de una llamada a la API
-  if (typeof window !== "undefined") {
-    return (
-      localStorage.getItem("userAvatar") ||
-      "/placeholder.svg?height=40&width=40"
-    );
+// Obtener la foto de perfil del usuario desde la sesión
+const getUserAvatar = (session: any) => {
+  // Si hay una sesión activa y tiene avatar, usarlo
+  if (session?.avatar) {
+    return session.avatar;
   }
-  return "/placeholder.svg?height=40&width=40";
+  
+  // Si hay un avatar en localStorage, usarlo
+  if (typeof window !== "undefined") {
+    const storedAvatar = localStorage.getItem("userAvatar");
+    if (storedAvatar) {
+      return storedAvatar;
+    }
+  }
+  
+  // Usar una imagen por defecto si no hay avatar
+  return "/images/users/default-avatar.png";
 };
 
 export default function Header() {
@@ -54,7 +60,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const { totalItems, toggleCart } = useCart();
   const [userAvatar, setUserAvatar] = useState(
-    "/placeholder.svg?height=40&width=40"
+    "/images/users/default-avatar.png"
   );
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
 
@@ -67,26 +73,31 @@ export default function Header() {
     window.location.href = "/";
   };
 
+  // Efecto para manejar el scroll y eventos de almacenamiento
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
-
-    // Obtener avatar del usuario
-    setUserAvatar(getUserAvatar());
-
-    // Escuchar cambios en el avatar
+    
     const handleStorageChange = () => {
-      setUserAvatar(getUserAvatar());
+      setUserAvatar(getUserAvatar(session));
     };
+    
+    // Configurar event listeners
+    window.addEventListener("scroll", handleScroll);
     window.addEventListener("storage", handleStorageChange);
-
+    
+    // Limpiar event listeners al desmontar
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, []);
+  }, [session]); // Añadimos session como dependencia
+  
+  // Efecto para actualizar el avatar cuando cambia la sesión
+  useEffect(() => {
+    setUserAvatar(getUserAvatar(session));
+  }, [session]);
 
   const navLinks = [
     { name: "Inicio", href: "/" },
@@ -164,12 +175,33 @@ export default function Header() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="flex flex-col p-4">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage 
+                        src={userAvatar} 
+                        alt={session?.username || 'Usuario'}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-mint-green/20 text-mint-green">
+                        {session?.username?.charAt(0).toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {session?.name || 'Usuario'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {session?.email || ''}
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/perfil" className="w-full">
-                    Perfil
+                <DropdownMenuItem className="p-0">
+                  <Link href="/perfil" className="w-full px-2 py-1.5">
+                    Mi Perfil
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>

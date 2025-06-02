@@ -1,0 +1,59 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "userId": 1,
+      "content": "Acabo de probar el nuevo Soft Pinch Liquid Blush y estoy enamorada 😍 El color es precioso y dura todo el día. ¿Alguien más lo ha probado? Me gustaría saber vuestra opinión sobre este producto. Llevo buscando un rubor líquido que no se vaya rápido y creo que por fin lo he encontrado. La textura es muy agradable y fácil de difuminar. También me gusta mucho el aplicador, que permite dosificar bien el producto sin desperdiciar. Lo he comprado en el tono 'Dewy Drop' y me parece perfecto para mi tono de piel medio.",
+      "image": "/images/Diseno_sin_titulo_-_2023-06-08T180552.924.webp",
+      "likes": 24,
+      "comments": [
+        {
+          "id": 1,
+          "userId": 2,
+          "content": "¡A mí también me encanta! ¿Qué tono es el que tienes?"
+        },
+        {
+          "id": 2,
+          "userId": 3,
+          "content": "Lo probé la semana pasada y estoy igual de enamorada. ¡El mejor rubor que he probado en mucho tiempo!"
+        }
+      ],
+      "createdAt": "2023-05-15T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "content": "¿Alguien conoce alguna rutina de cuidado facial para pieles sensibles? He probado varias pero mi piel se irrita fácilmente. Necesito recomendaciones de productos que sean suaves pero efectivos. Preferiblemente que sean de la marca Saturn Beauty, ya que me han funcionado bien otros productos suyos en el pasado.",
+      "image": "",
+      "likes": 15,
+      "comments": [
+        {
+          "id": 3,
+          "userId": 4,
+          "content": "Yo tengo la piel súper sensible y el gel limpiador de Saturn Beauty me ha ido genial. ¡Muy recomendable!"
+        }
+      ],
+      "createdAt": "2023-05-14T16:45:00Z"
+    },
+    {
+      "id": 3,
+      "userId": 3,
+      "content": "¡Hoy es el día perfecto para probar el nuevo labial líquido mate de larga duración! 💄 ¿Alguna recomendación de tono? Busco algo que sea versátil para el día a día pero que también pueda usar en ocasiones especiales. Me gustan los tonos nude-rosados que no aclaren demasiado los labios. ¿Cuál es vuestro favorito?",
+      "image": "/images/labial-mate.jpg",
+      "likes": 32,
+      "comments": [
+        {
+          "id": 4,
+          "userId": 1,
+          "content": "El tono 'Velvet Rose' es precioso para el día a día, ¡y dura horas sin necesidad de retoques!"
+        },
+        {
+          "id": 5,
+          "userId": 5,
+          "content": "A mí me encanta 'Mauve It' porque es un tono que queda bien con todo y para cualquier ocasión."
+        }
+      ],
+      "createdAt": "2023-05-13T09:15:00Z"
+    }
+  ]
+}

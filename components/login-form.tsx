@@ -33,6 +33,7 @@ export default function LoginForm() {
   const [registerData, setRegisterData] = useState({
     name: "",
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
   });
@@ -47,7 +48,7 @@ export default function LoginForm() {
     setRegisterData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!loginData.emailOrUsername || !loginData.password) {
@@ -61,70 +62,81 @@ export default function LoginForm() {
 
     setIsLoading(true);
 
-    const user = login(loginData.emailOrUsername, loginData.password);
+    try {
+      const user = await login(loginData.emailOrUsername, loginData.password);
 
-    if (user) {
-      if (user.role === "admin") {
-        toast({
-          title: "¡Bienvenida Administradora!",
-          description: "Accediendo al panel de administración.",
-        });
-        router.push("/admin");
+      if (user) {
+        if (user.role === "admin") {
+          toast({
+            title: `¡Bienvenido/a ${user.name}!`,
+            description: "Accediendo al panel de administración.",
+          });
+          router.push("/admin");
+        } else {
+          toast({
+            title: `¡Bienvenido/a ${user.name}!`,
+            description: "Disfruta de tu experiencia en Saturn Beauty.",
+          });
+          router.push("/");
+        }
       } else {
         toast({
-          title: "¡Inicio de sesión exitoso!",
-          description: "Bienvenido/a de nuevo a Saturn Beauty.",
+          title: "Error",
+          description: "Email/nombre de usuario o contraseña incorrectos.",
+          variant: "destructive",
         });
-        router.push("/");
       }
-    } else {
+    } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: "Error",
-        description: "Credenciales inválidas.",
+        description: "Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo de nuevo.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      !registerData.name ||
-      !registerData.email ||
-      !registerData.password ||
-      !registerData.confirmPassword
-    ) {
-      toast({
-        title: "Error",
-        description: "Por favor, completa todos los campos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (registerData.password !== registerData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Las contraseñas no coinciden.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      toast({
-        title: "¡Registro exitoso!",
-        description: "Tu cuenta ha sido creada. Bienvenido/a a Saturn Beauty.",
+    
+    try {
+      const result = await register({
+        name: registerData.name,
+        email: registerData.email,
+        username: registerData.username, // Use the username from the form
+        password: registerData.password,
+        confirmPassword: registerData.confirmPassword,
       });
+
+      if (result.success) {
+        toast({
+          title: "¡Registro exitoso!",
+          description: result.message,
+        });
+        
+        // Redirect based on user role (default is 'user' for new registrations)
+        router.push("/");
+      } else {
+        toast({
+          title: "Error en el registro",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al registrar el usuario. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      router.push("/");
-    }, 1500);
+    }
   };
 
   return (
@@ -197,24 +209,34 @@ export default function LoginForm() {
           <TabsContent value="register">
             <form onSubmit={handleRegister} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="register-name">Nombre</Label>
+                <Label htmlFor="register-name">Nombre completo</Label>
                 <Input
                   id="register-name"
                   name="name"
                   type="text"
-
                   value={registerData.name}
                   onChange={handleRegisterChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-email">Correo Electrónico</Label>
+                <Label htmlFor="register-email">Correo electrónico</Label>
                 <Input
                   id="register-email"
                   name="email"
                   type="email"
                   value={registerData.email}
+                  onChange={handleRegisterChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="register-username">Nombre de usuario</Label>
+                <Input
+                  id="register-username"
+                  name="username"
+                  type="text"
+                  value={registerData.username}
                   onChange={handleRegisterChange}
                   required
                 />
@@ -227,22 +249,16 @@ export default function LoginForm() {
                   value={registerData.password}
                   onChange={handleRegisterChange}
                   required
-                  className="w-full font-poppins"
-
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-confirm-password">
-                  Confirmar Contraseña
-                </Label>
+                <Label htmlFor="register-confirm-password">Confirmar Contraseña</Label>
                 <PasswordInput
                   id="register-confirm-password"
                   name="confirmPassword"
                   value={registerData.confirmPassword}
                   onChange={handleRegisterChange}
                   required
-                  className="w-full font-poppins"
-
                 />
               </div>
               <Button

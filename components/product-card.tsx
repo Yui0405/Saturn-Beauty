@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Star, Heart } from "lucide-react";
+import { Star, Heart, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
 import { useWishlist } from "@/contexts/wishlist-context";
+import { isAuthenticated } from "@/lib/auth";
+import { toast } from "@/hooks/use-toast";
 
 type Product = {
   id: number | string;
@@ -40,14 +43,43 @@ export default function ProductCard({
   const productId = typeof product.id === 'string' ? parseInt(product.id) : product.id;
   const isWishlisted = isInWishlist(productId);
 
+  const router = useRouter();
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      toast({
+        title: "Inicia sesión para continuar",
+        description: "Debes iniciar sesión para agregar productos al carrito.",
+        variant: "default",
+        action: (
+          <Button 
+            variant="outline" 
+            className="border-mint-green text-mint-green hover:bg-mint-green/10"
+            onClick={() => router.push('/login')}
+          >
+            <LogIn className="h-4 w-4 mr-2" />
+            Iniciar sesión
+          </Button>
+        ),
+      });
+      return;
+    }
+    
+    // Add item to cart if user is authenticated
     addItem({
       id: productId,
       name: product.name,
       price: product.price,
       image: product.image
+    });
+    
+    toast({
+      title: "Producto agregado",
+      description: `${product.name} se ha añadido al carrito.`,
     });
   };
 
