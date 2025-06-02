@@ -1,19 +1,21 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "@/hooks/use-toast"
-import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X } from "lucide-react"
+import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
+import ProductCard from "./product-card"; // Added the missing import
 
 // Enhanced sample user data with realistic order history
 const userData = {
@@ -227,8 +229,26 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<string>('visa')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { addItem } = useCart()
   const { items: wishlistItems, removeItem: removeFromWishlist } = useWishlist()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(6) // Mostrar 6 productos por página
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  // Calcular los productos a mostrar en la página actual
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentItems = wishlistItems.slice(indexOfFirstItem, indexOfLastItem)
+  const totalPages = Math.ceil(wishlistItems.length / itemsPerPage)
+
+  // Cambiar de página
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  
+  // Resetear a la primera página cuando cambie la lista de deseos
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [wishlistItems.length])
 
   useEffect(() => {
     setActiveTab(initialTab)
@@ -361,7 +381,7 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
         <TabsContent value="wishlist">
           <Card>
             <CardHeader>
-              <CardTitle className="font-playfair">Mis Favoritos</CardTitle>
+              <CardTitle className="font-playfair text-mint-green-dark">Mis Favoritos</CardTitle>
               <CardDescription className="font-poppins">
                 Tus productos guardados para más tarde.
               </CardDescription>
@@ -380,50 +400,88 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wishlistItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                      <div className="relative aspect-square bg-gray-50">
-                        <Image
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {currentItems.map((item) => (
+                      <div key={item.id} className="relative group">
+                        <ProductCard 
+                          product={{
+                            ...item,
+                            rating: item.rating || 4.5,
+                            category: item.category || '',
+                          }}
+                          className="h-full"
                         />
                         <button
-                          onClick={() => removeFromWishlist(item.id)}
-                          className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-red-500 transition-colors"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            removeFromWishlist(item.id);
+                          }}
+                          className="absolute top-3 right-3 z-20 p-2 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-red-500 transition-colors shadow-md"
                           aria-label="Eliminar de favoritos"
                         >
                           <X className="h-4 w-4" />
                         </button>
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">
-                          {item.name}
-                        </h3>
-                        <p className="text-mint-green-dark font-bold mb-3">
-                          {new Intl.NumberFormat("es-ES", {
-                            style: "currency",
-                            currency: "EUR",
-                          }).format(item.price)}
+                    ))}
+                  </div>
+                  
+                  {/* Controles de paginación */}
+                  {totalPages > 1 && (
+                    <div className="flex flex-col sm:flex-row justify-between items-center mt-8 pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-2 mb-4 sm:mb-0">
+                        <p className="text-sm text-gray-600">
+                          Página {currentPage} de {totalPages}
                         </p>
-                        <Button 
-                          onClick={() => {
-                            addItem(item);
-                            toast({
-                              title: "Producto añadido al carrito",
-                              description: `${item.name} se ha añadido a tu carrito.`,
-                            });
-                          }}
-                          className="w-full bg-mint-green text-mint-green-dark font-poppins"
-                        >
-                          Añadir al carrito
-                        </Button>
+                        <p className="text-sm text-gray-500">
+                          ({indexOfFirstItem + 1}-{Math.min(indexOfLastItem, wishlistItems.length)} de {wishlistItems.length} productos)
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => paginate(1)}
+                            disabled={currentPage === 1}
+                            className="hidden sm:flex"
+                          >
+                            Primera
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => paginate(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className="h-9 px-3"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className="h-9 px-3"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => paginate(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="hidden sm:flex"
+                          >
+                            Última
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -792,13 +850,13 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle className="font-playfair">Ajustes de la Cuenta</CardTitle>
+              <CardTitle className="font-playfair text-mint-green-dark">Ajustes de la Cuenta</CardTitle>
               <CardDescription className="font-poppins">Gestiona tus preferencias y seguridad.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
                 <div>
-                  <h3 className="font-medium mb-4 font-playfair">Métodos de Pago</h3>
+                  <h3 className="font-medium mb-4 font-playfair text-mint-green-dark">Métodos de Pago</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <button
                       type="button"
@@ -860,19 +918,70 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                       <Label htmlFor="current-password" className="font-poppins">
                         Contraseña Actual
                       </Label>
-                      <Input id="current-password" type="password" className="font-poppins" />
+                      <div className="relative">
+                        <Input 
+                          id="current-password" 
+                          type={showCurrentPassword ? "text" : "password"} 
+                          className="font-poppins pr-10" 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="new-password" className="font-poppins">
                         Nueva Contraseña
                       </Label>
-                      <Input id="new-password" type="password" className="font-poppins" />
+                      <div className="relative">
+                        <Input 
+                          id="new-password" 
+                          type={showNewPassword ? "text" : "password"} 
+                          className="font-poppins pr-10" 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password" className="font-poppins">
                         Confirmar Nueva Contraseña
                       </Label>
-                      <Input id="confirm-password" type="password" className="font-poppins" />
+                      <div className="relative">
+                        <Input 
+                          id="confirm-password" 
+                          type={showConfirmPassword ? "text" : "password"} 
+                          className="font-poppins pr-10" 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     <Button className="bg-mint-green hover:bg-accent-green hover:text-mint-green font-poppins">
                       Cambiar Contraseña
@@ -881,7 +990,7 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                 </div>
 
                 <div className="border-t pt-6">
-                  <h3 className="font-medium mb-4 font-playfair">Notificaciones</h3>
+                  <h3 className="font-medium mb-4 font-playfair text-mint-green-dark">Notificaciones</h3>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -923,7 +1032,7 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                 </div>
 
                 <div className="border-t pt-6">
-                  <h3 className="font-medium mb-4 font-playfair">Cerrar Sesión</h3>
+                  <h3 className="font-medium mb-4 font-playfair text-mint-green-dark">Cerrar Sesión</h3>
                   <Button
                     variant="outline"
                     className="border-red-300 text-red-500 hover:bg-red-50 font-poppins"

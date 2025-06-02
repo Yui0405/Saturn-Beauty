@@ -9,6 +9,8 @@ export type WishlistItem = {
   name: string
   price: number
   image: string
+  rating: number
+  category: string
 }
 
 type WishlistContextType = {
@@ -56,24 +58,30 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
       if (exists) {
         return prevItems
       } else {
-        toast({
-          title: "Añadido a favoritos",
-          description: newItem.name,
-        })
-
         return [...prevItems, newItem]
       }
     })
+    
+    // Mover el toast fuera del setState
+    if (!items.some(item => item.id === newItem.id)) {
+      toast({
+        title: "Añadido a favoritos",
+        description: newItem.name,
+      })
+    }
   }
 
   const removeItem = (id: number) => {
     setItems((prevItems) => {
       const itemToRemove = prevItems.find((item) => item.id === id)
+      // Mostrar el toast solo si el item existe
       if (itemToRemove) {
-        toast({
-          title: "Eliminado de favoritos",
-          description: itemToRemove.name,
-        })
+        setTimeout(() => {
+          toast({
+            title: "Eliminado de favoritos",
+            description: itemToRemove.name,
+          })
+        }, 0)
       }
       return prevItems.filter((item) => item.id !== id)
     })

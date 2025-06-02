@@ -44,30 +44,34 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addItem = (newItem: Omit<CartItem, "quantity">) => {
     setItems((prevItems) => {
-      // Verificar si el item ya existe en el carrito
       const existingItemIndex = prevItems.findIndex((item) => item.id === newItem.id)
+      let newItems;
 
-      if (existingItemIndex >= 0) {
-        // Si existe, incrementar la cantidad
-        const updatedItems = [...prevItems]
-        updatedItems[existingItemIndex].quantity += 1
-
-        toast({
-          title: "Producto actualizado",
-          description: `${newItem.name} (${updatedItems[existingItemIndex].quantity}x)`,
-        })
-
-        return updatedItems
+      if (existingItemIndex > -1) {
+        // Si el producto ya está en el carrito, incrementar la cantidad
+        newItems = [...prevItems]
+        newItems[existingItemIndex].quantity += 1
       } else {
         // Si no existe, añadirlo con cantidad 1
-        toast({
-          title: "Producto añadido",
-          description: newItem.name,
-        })
-
-        return [...prevItems, { ...newItem, quantity: 1 }]
+        newItems = [...prevItems, { ...newItem, quantity: 1 }]
       }
+      
+      return newItems
     })
+    
+    // Mover el toast fuera del setState
+    const existingItem = items.find(item => item.id === newItem.id);
+    if (existingItem) {
+      toast({
+        title: "Producto actualizado",
+        description: `${newItem.name} (${existingItem.quantity + 1}x)`,
+      })
+    } else {
+      toast({
+        title: "Producto añadido",
+        description: newItem.name,
+      })
+    }
   }
 
   const removeItem = (id: number) => {

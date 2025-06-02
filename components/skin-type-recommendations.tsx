@@ -162,28 +162,6 @@ export default function SkinTypeRecommendations() {
                 key={product.id}
                 product={product}
                 className="h-full"
-                onAddToCart={() => {
-                  addItem({
-                    id: Number(product.id),
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                  });
-                }}
-                onToggleWishlist={() => {
-                  if (isInWishlist(Number(product.id))) {
-                    removeFromWishlist(Number(product.id));
-                  } else {
-                    addToWishlist({
-                      id: Number(product.id),
-                      name: product.name,
-                      price: product.price,
-                      image: product.image
-                    });
-                  }
-                }}
-                isInWishlist={isInWishlist(Number(product.id))}
               />
             ))}
           </div>
