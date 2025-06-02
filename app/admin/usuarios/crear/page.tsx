@@ -176,42 +176,84 @@ export default function CreateUserPage() {
       isLoading={isLoading}
       backUrl="/admin/usuarios"
     >
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Nombre Completo</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
+      <div className="space-y-6">
+        {/* Sección de imagen de perfil */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
+            <Image
+              src={previewImage}
+              alt="Vista previa de la imagen de perfil"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="text-center">
+            <input
+              type="file"
+              id="avatar"
+              accept="image/jpeg,image/png"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+            <label
+              htmlFor="avatar"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mint-green cursor-pointer"
+            >
+              Subir imagen
+            </label>
+            <p className="mt-1 text-xs text-gray-500">
+              JPG, PNG (máx. 2MB)
+            </p>
+          </div>
         </div>
-        <div>
-          <Label htmlFor="username">Nombre de Usuario</Label>
-          <Input
-            id="username"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            required
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
+
+        {/* Campos del formulario */}
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+              Nombre Completo
+            </Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="mt-1 w-full"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+              Nombre de Usuario
+            </Label>
+            <Input
+              id="username"
+              value={formData.username}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
+              className="mt-1 w-full"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              Correo Electrónico
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="mt-1 w-full"
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              Contraseña
+            </Label>
             <Input
               id="password"
               type="password"
@@ -219,13 +261,14 @@ export default function CreateUserPage() {
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
+              className="mt-1 w-full"
               required
-              minLength={8}
             />
           </div>
-
           <div>
-            <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+            <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+              Confirmar Contraseña
+            </Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -233,35 +276,36 @@ export default function CreateUserPage() {
               onChange={(e) =>
                 setFormData({ ...formData, confirmPassword: e.target.value })
               }
+              className="mt-1 w-full"
               required
-              minLength={8}
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Imagen de Perfil</Label>
-          <div className="flex items-center gap-4">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
-              <Image
-                src={previewImage}
-                alt="Preview"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <Input
-                id="avatar"
-                type="file"
-                accept="image/jpeg,image/png"
-                onChange={handleImageChange}
-                className="cursor-pointer"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Formatos: JPG, PNG. Máx. 2MB
-              </p>
-            </div>
+          <div>
+            <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+              Teléfono
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              className="mt-1 w-full"
+            />
+          </div>
+          <div>
+            <Label htmlFor="address" className="text-sm font-medium text-gray-700">
+              Dirección
+            </Label>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
+              className="mt-1 w-full"
+            />
           </div>
         </div>
       </div>

@@ -44,8 +44,45 @@ export default function UsuariosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Función para cargar usuarios desde localStorage
+  const loadFromLocalStorage = () => {
+    const storedUsers = localStorage.getItem('saturn-users');
+    if (storedUsers) {
+      const usersData = JSON.parse(storedUsers);
+      const formattedUsers = usersData.map((user: User) => ({
+        id: user.id,
+        username: user.username || '',
+        email: user.email || '',
+        role: (user.role === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
+        name: user.name || '',
+        avatar: user.avatar || '/placeholder.svg',
+        bio: user.bio || '',
+        telefono: user.telefono || '',
+        direccion: user.direccion || '',
+        password: user.password || '',
+        joinDate: user.joinDate || new Date().toISOString(),
+        lastLogin: user.lastLogin || new Date().toISOString(),
+        createdAt: user.createdAt || new Date().toISOString()
+      }));
+      setUsers(formattedUsers);
+    }
+  };
+
   useEffect(() => {
+    // Cargar usuarios al montar el componente
     loadUsers();
+    
+    // Escuchar eventos de almacenamiento para actualizar la lista cuando cambien los datos
+    const handleStorageChange = () => {
+      loadFromLocalStorage();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Limpiar el event listener al desmontar el componente
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
