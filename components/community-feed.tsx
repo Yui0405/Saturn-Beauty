@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { X } from "lucide-react";
+import { X, Trash2, ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,7 +11,6 @@ import {
   Share2,
   Send,
   User,
-  ImageIcon,
   ChevronDown,
   ChevronUp,
   Loader2,
@@ -109,6 +108,7 @@ const MAX_VISIBLE_COMMENTS = 3;
 
 export default function CommunityFeed() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { session } = useAuth();
@@ -356,6 +356,31 @@ export default function CommunityFeed() {
     }
   };
 
+  const handleDeletePost = (postId: number) => {
+    // Remove from state
+    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    
+    // Remove from localStorage
+    const savedPosts = JSON.parse(localStorage.getItem('userPosts') || '[]');
+    const updatedPosts = savedPosts.filter((post: Post) => post.id !== postId);
+    localStorage.setItem('userPosts', JSON.stringify(updatedPosts));
+    
+    // Close confirmation dialog
+    setShowDeleteConfirm(null);
+    
+    // Show success message
+    toast({
+      title: "Publicación eliminada",
+      description: "La publicación se ha eliminado correctamente.",
+      variant: "default",
+    });
+  };
+  
+  const isCurrentUserPost = (postUserId: number) => {
+    const currentUser = session || JSON.parse(localStorage.getItem('user') || '{}');
+    return currentUser?.id === postUserId.toString();
+  };
+
   const handleImageButtonClick = () => {
     fileInputRef.current?.click();
   };
@@ -545,13 +570,57 @@ export default function CommunityFeed() {
                       {post.user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <Link
-                      href={`/usuario/${post.user.id}`}
-                      className="font-playfair font-medium hover:text-mint-green"
-                    >
-                      {post.user.name}
-                    </Link>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <Link
+                        href={`/usuario/${post.user.id}`}
+                        className="font-playfair font-medium hover:text-mint-green"
+                      >
+                        {post.user.name}
+                      </Link>
+                      {isCurrentUserPost(post.user.id) && (
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-red-500 p-1 h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowDeleteConfirm(showDeleteConfirm === post.id ? null : post.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          {showDeleteConfirm === post.id && (
+                            <div className="absolute right-0 mt-1 w-64 bg-white rounded-lg shadow-lg p-4 z-10 border border-gray-200">
+                              <p className="text-sm text-gray-700 mb-3">¿Estás seguro de que quieres eliminar esta publicación?</p>
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowDeleteConfirm(null);
+                                  }}
+                                >
+                                  Cancelar
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePost(post.id);
+                                  }}
+                                >
+                                  Eliminar
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500 font-poppins">
                       {post.timestamp}
                     </p>
