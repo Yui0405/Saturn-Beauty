@@ -354,6 +354,9 @@ export default function EditUserPage() {
 
       // Guardar en localStorage
       localStorage.setItem('saturn-users', JSON.stringify(updatedUsers));
+      
+      // Disparar evento personalizado para actualizar el contador en tiempo real
+      window.dispatchEvent(new Event('usersUpdated'));
 
       // Actualizar el estado local
       setUser(updatedUser);

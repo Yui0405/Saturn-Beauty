@@ -254,6 +254,9 @@ export default function CreateUserPage() {
 
       // Guardar el nuevo usuario
       localStorage.setItem('saturn-users', JSON.stringify([...users, newUser]));
+      
+      // Disparar evento personalizado para actualizar el contador en tiempo real
+      window.dispatchEvent(new Event('usersUpdated'));
 
       // Redirigir a la lista de usuarios
       router.push("/admin/usuarios");

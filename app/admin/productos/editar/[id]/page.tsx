@@ -225,6 +225,9 @@ export default function EditarProductoPage({
       
       // Guardar en localStorage
       localStorage.setItem('saturn-products', JSON.stringify(existingProducts));
+      
+      // Disparar evento personalizado para actualizar el contador en tiempo real
+      window.dispatchEvent(new Event('productsUpdated'));
 
       toast({
         title: "Éxito",

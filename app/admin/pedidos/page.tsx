@@ -123,6 +123,9 @@ export default function PedidosPage() {
       
       // Save to localStorage
       localStorage.setItem('saturn-orders', JSON.stringify(updatedOrders));
+      
+      // Dispatch event to update order count in real-time
+      window.dispatchEvent(new Event('ordersUpdated'));
 
       // Persist changes to JSON file
       await saveOrdersToFile(updatedOrders);
