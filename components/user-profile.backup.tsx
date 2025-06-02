@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "@/hooks/use-toast"
-import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X } from "lucide-react"
+import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
 
@@ -230,6 +230,23 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
   const { addItem } = useCart()
   const { items: wishlistItems, removeItem: removeFromWishlist } = useWishlist()
 
+  // Estado para la paginación
+  // Estado para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  // Calcular valores de paginación
+  const totalPages = Math.ceil(wishlistItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedWishlist = wishlistItems.slice(startIndex, startIndex + itemsPerPage);
+
+  // Manejar cambio de página
+  const handlePageChange = (newPage: number, e?: React.MouseEvent) => {
+    e?.preventDefault();
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     setActiveTab(initialTab)
   }, [initialTab])
@@ -381,7 +398,7 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wishlistItems.map((item) => (
+                  {paginatedWishlist.map((item) => (
                     <div key={item.id} className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                       <div className="relative aspect-square bg-gray-50">
                         <Image
@@ -424,6 +441,58 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                     </div>
                   ))}
                 </div>
+                
+                {/* Pagination */}
+                {totalPages > 0 && (
+                  <div className="flex flex-col sm:flex-row justify-between items-center mt-8 pt-4 border-t border-gray-200">
+                    <div className="flex items-center gap-2 mb-4 sm:mb-0">
+                      <p className="text-sm text-gray-600">
+                        Página {currentPage} de {totalPages}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        ({startIndex + 1}-{Math.min(startIndex + itemsPerPage, wishlistItems.length)} de {wishlistItems.length} productos)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(1, e)}
+                          disabled={currentPage === 1}
+                          className="hidden sm:flex"
+                        >
+                          Primera
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(Math.max(1, currentPage - 1), e)}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(Math.min(totalPages, currentPage + 1), e)}
+                          disabled={currentPage === totalPages}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(totalPages, e)}
+                          disabled={currentPage === totalPages}
+                          className="hidden sm:flex"
+                        >
+                          Última
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               )}
             </CardContent>
           </Card>
@@ -749,7 +818,7 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {wishlistItems.map((product) => (
+                  {paginatedWishlist.map((product) => (
                     <div key={product.id} className="border rounded-lg overflow-hidden">
                       <div className="relative h-40">
                         <Image
@@ -784,6 +853,58 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                     </div>
                   ))}
                 </div>
+                
+                {/* Pagination */}
+                {totalPages > 0 && (
+                  <div className="flex flex-col sm:flex-row justify-between items-center mt-8 pt-4 border-t border-gray-200">
+                    <div className="flex items-center gap-2 mb-4 sm:mb-0">
+                      <p className="text-sm text-gray-600">
+                        Página {currentPage} de {totalPages}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        ({startIndex + 1}-{Math.min(startIndex + itemsPerPage, wishlistItems.length)} de {wishlistItems.length} productos)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(1, e)}
+                          disabled={currentPage === 1}
+                          className="hidden sm:flex"
+                        >
+                          Primera
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(Math.max(1, currentPage - 1), e)}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(Math.min(totalPages, currentPage + 1), e)}
+                          disabled={currentPage === totalPages}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handlePageChange(totalPages, e)}
+                          disabled={currentPage === totalPages}
+                          className="hidden sm:flex"
+                        >
+                          Última
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               )}
             </CardContent>
           </Card>

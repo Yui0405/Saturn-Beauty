@@ -55,7 +55,7 @@ export default function ProductsGrid() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(12);
-  const [minRating, setMinRating] = useState<number>(0);
+  const [maxRating, setMaxRating] = useState<number | null>(null);
   
   // Estado para controlar la sección activa del acordeón
   const [activeSection, setActiveSection] = useState<string | null>('categorias');
@@ -166,32 +166,27 @@ export default function ProductsGrid() {
       return false;
     }
     
+    // Filtrar por calificación máxima
+    if (maxRating !== null && product.rating > maxRating + 0.9999) {
+      return false;
+    }
+    
     // Filtrar por rango de precio
     const price = Number(product.price);
     if (isNaN(price)) return false;
     
     switch(priceRange) {
       case '0-20':
-        if (price >= 0 && price <= 20) return true;
-        return false;
+        return price >= 0 && price <= 20;
       case '20-50':
-        if (price > 20 && price <= 50) return true;
-        return false;
+        return price > 20 && price <= 50;
       case '50-100':
-        if (price > 50 && price <= 100) return true;
-        return false;
+        return price > 50 && price <= 100;
       case '100+':
-        if (price > 100) return true;
-        return false;
+        return price > 100;
       case 'all':
       default:
-        // No filtrar por precio
         return true;
-    }
-    
-    // Filtrar por calificación mínima
-    if (product.rating < minRating) {
-      return false;
     }
     
     return true;
@@ -248,7 +243,7 @@ export default function ProductsGrid() {
 
   // Función para manejar el cambio de calificación mínima
   const handleRatingChange = (value: number[]) => {
-    setMinRating(value[0]);
+    setMaxRating(value[0]);
     setCurrentPage(1);
   };
 
@@ -439,8 +434,10 @@ export default function ProductsGrid() {
                 <div className="space-y-4 mt-3">
                   <div className="mb-2">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-700">Calificación mínima</span>
-                      <span className="text-sm font-medium text-mint-green-dark">{minRating} estrella{minRating !== 1 ? 's' : ''}</span>
+                      <span className="text-sm text-gray-700">Calificación máxima</span>
+                      <span className="text-sm font-medium text-mint-green-dark">
+                        {maxRating === null ? 'Todas' : `Hasta ${maxRating} estrellas`}
+                      </span>
                     </div>
                     
                     <div className="flex items-center justify-center py-2">
@@ -448,15 +445,9 @@ export default function ProductsGrid() {
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star 
                             key={star}
-                            className={`h-6 w-6 mx-1 ${star <= minRating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} cursor-pointer hover:scale-110 transition-transform`}
+                            className={`h-6 w-6 mx-1 ${(maxRating === null || star <= maxRating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'} cursor-pointer hover:scale-110 transition-transform`}
                             onClick={() => {
-                              // Solo establecer la calificación, nunca limpiar al hacer clic
-                              if (star > minRating) {
-                                setMinRating(star);
-                              } else if (star < minRating) {
-                                setMinRating(star);
-                              }
-                              // Si star === minRating, no hacer nada (mantener la selección)
+                              setMaxRating(star);
                             }}
                             onMouseEnter={(e) => {
                               // Efecto visual al pasar el mouse sobre las estrellas
@@ -481,7 +472,7 @@ export default function ProductsGrid() {
                 onClick={() => {
                   setSelectedCategories([]);
                   setPriceRange('all');
-                  setMinRating(0);
+                  setMaxRating(null);
                   setCurrentPage(1);
                 }}
                 className="w-full py-2 px-4 border bg-background border-mint-green text-mint-green-dark hover:bg-mint-green/10 hover:text-mint-green-dark rounded transition-colors"
@@ -536,192 +527,41 @@ export default function ProductsGrid() {
                 : 'grid-cols-1 space-y-4'
             )}>
               {sortedProducts.map((product) => (
-                viewMode === 'grid' ? (
-                  <div 
-                    key={product.id}
-                    className="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
-                  >
-                    
-                    {/* Imagen del producto */}
-                    <div className="relative pt-[100%] bg-gray-50">
-                      <Image
-                        src={product.image || '/placeholder.svg'}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      
-                      {/* Botón de favoritos */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isInWishlist(parseInt(product.id))) {
-                            removeFromWishlist(parseInt(product.id));
-                          } else {
-                            addToWishlist({
-                              id: parseInt(product.id),
-                              name: product.name,
-                              price: product.price,
-                              image: product.image
-                            });
-                          }
-                        }}
-                        className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10"
-                      >
-                        <Heart 
-                          className={`h-5 w-5 ${isInWishlist(parseInt(product.id)) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
-                        />
-                      </button>
-                    </div>
-                    
-                    {/* Contenido */}
-                    <div className="p-4">
-                      {/* Categoría */}
-                      <span className="text-xs text-gray-500 font-medium">
-                        {product.category}
-                      </span>
-                      
-                      {/* Título */}
-                      <h3 className="font-medium text-mint-green-dark mt-1 mb-2 line-clamp-2 h-12 text-base">
-                        {product.name}
-                      </h3>
-                      
-                      {/* Valoración y Precio */}
-                      <div className="mb-3">
-                        <div className="flex items-center mb-1">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-500 ml-1">({product.rating})</span>
-                        </div>
-                        <span className="text-lg font-bold text-gray-900">
-                          {new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: 'USD',
-                            minimumFractionDigits: 2
-                          }).format(product.price)}
-                        </span>
-                      </div>
-                      
-                      {/* Botón de añadir al carrito */}
-                      <div className="mt-4 pt-3 border-t border-gray-100">
-                        <Button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addItem({
-                              id: product.id,
-                              name: product.name,
-                              price: product.price,
-                              image: product.image,
-                              quantity: 1
-                            });
-                          }}
-                          className="w-full bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium h-9"
-                        >
-                          Añadir al carrito
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div 
-                    key={product.id}
-                    className="flex flex-col md:flex-row bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 mb-4"
-                  >
-                    <div className="relative w-full md:w-48 h-48 md:h-auto flex-shrink-0">
-                      <Image
-                        src={product.image || '/placeholder.svg'}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    
-                    <div className="p-4 flex-1 flex flex-col">
-                      <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-2">
-                        <h3 className="text-xl font-medium text-mint-green-dark mb-1">
-                          {product.name}
-                        </h3>
-                        <div className="flex items-end">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (isInWishlist(parseInt(product.id))) {
-                                removeFromWishlist(parseInt(product.id));
-                              } else {
-                                addToWishlist({
-                                  id: parseInt(product.id),
-                                  name: product.name,
-                                  price: product.price,
-                                  image: product.image
-                                });
-                              }
-                            }}
-                            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                            aria-label={isInWishlist(parseInt(product.id)) ? 'Quitar de favoritos' : 'Añadir a favoritos'}
-                          >
-                            <Heart 
-                              className={`h-5 w-5 ${isInWishlist(parseInt(product.id)) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
-                            />
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <span className="text-xs text-gray-500 font-medium mb-2">
-                        {product.category}
-                      </span>
-                      
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {product.description}
-                      </p>
-                      
-                      <span className="text-xl font-bold text-gray-900 mb-4 block">
-                        {new Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: 'USD',
-                          minimumFractionDigits: 2
-                        }).format(product.price)}
-                      </span>
-                      
-                      <div className="mt-auto pt-3 border-t border-gray-100">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="flex items-center">
-                            <div className="flex mr-1">
-                              {[0, 1, 2, 3, 4].map((i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                                />
-                              ))}
-                            </div>
-                            <span className="text-xs text-gray-500">({product.rating})</span>
-                          </div>
-                          
-                          <Button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addItem({
-                                id: product.id,
-                                name: product.name,
-                                price: product.price,
-                                image: product.image,
-                                quantity: 1
-                              });
-                            }}
-                            className="bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium px-4 py-2 h-10"
-                          >
-                            Añadir al carrito
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    category: product.category,
+                    price: product.price,
+                    rating: product.rating,
+                    image: product.image,
+                    stock: product.stock
+                  }}
+                  onAddToCart={() => {
+                    addItem({
+                      id: Number(product.id),
+                      name: product.name,
+                      price: product.price,
+                      image: product.image,
+                      quantity: 1
+                    });
+                  }}
+                  onToggleWishlist={() => {
+                    if (isInWishlist(parseInt(product.id))) {
+                      removeFromWishlist(parseInt(product.id));
+                    } else {
+                      addToWishlist({
+                        id: parseInt(product.id),
+                        name: product.name,
+                        price: product.price,
+                        image: product.image
+                      });
+                    }
+                  }}
+                  isInWishlist={isInWishlist(parseInt(product.id))}
+                  variant={viewMode === 'grid' ? 'grid' : 'list'}
+                />
               ))}
             </div>
           ) : (

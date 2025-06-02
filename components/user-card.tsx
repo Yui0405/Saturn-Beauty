@@ -18,7 +18,7 @@ export default function UserCard({ user, compact = false }: UserCardProps) {
         <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+              <AvatarImage src={user.avatar || "/images/placeholder.svg"} alt={user.name} />
               <AvatarFallback>
                 <User className="h-6 w-6" />
               </AvatarFallback>
@@ -41,7 +41,7 @@ export default function UserCard({ user, compact = false }: UserCardProps) {
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center">
             <Avatar className="h-12 w-12 mb-4">
-              <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+              <AvatarImage src={user.avatar || "/images/placeholder.svg"} alt={user.name} />
               <AvatarFallback>
                 <User className="h-6 w-6" />
               </AvatarFallback>

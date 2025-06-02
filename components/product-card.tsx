@@ -7,101 +7,145 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
 import { useWishlist } from "@/contexts/wishlist-context";
 
-type ProductCardProps = {
-  product: {
-    id: number;
-    name: string;
-    price: number;
-    rating: number;
-    image: string;
-  };
+type Product = {
+  id: number | string;
+  name: string;
+  description?: string;
+  price: number;
+  rating: number;
+  image: string;
+  skinType?: string;
+  category?: string;
+  stock?: number;
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
+type ProductCardProps = {
+  product: Product;
+  className?: string;
+  variant?: 'default' | 'carousel';
+};
+
+export default function ProductCard({ 
+  product, 
+  className,
+  variant = 'default' 
+}: ProductCardProps) {
   const { addItem } = useCart();
   const {
     addItem: addToWishlist,
     removeItem: removeFromWishlist,
     isInWishlist,
   } = useWishlist();
-  const isWishlisted = isInWishlist(product.id);
+  
+  const productId = typeof product.id === 'string' ? parseInt(product.id) : product.id;
+  const isWishlisted = isInWishlist(productId);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     addItem({
-      id: product.id,
+      id: productId,
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.image
     });
   };
 
-  const handleToggleWishlist = () => {
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isWishlisted) {
-      removeFromWishlist(product.id);
+      removeFromWishlist(productId);
     } else {
       addToWishlist({
-        id: product.id,
+        id: productId,
         name: product.name,
         price: product.price,
-        image: product.image,
+        image: product.image
       });
     }
   };
 
   return (
-    <div className="product-card flex flex-col">
-      <div className="relative pt-[100%] bg-gray-100">
-        <Image
-          src={product.image || "/placeholder.svg"}
-          alt={product.name}
-          fill
-          className="object-cover p-4"
-        />
-        <Button
-          size="icon"
-          className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white"
-          onClick={handleToggleWishlist}
-        >
-          <Heart
-            className={cn(
-              "h-5 w-5",
-              isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"
-            )}
+    <div 
+      className={cn(
+        'relative flex flex-col bg-white rounded-lg overflow-hidden border border-gray-100 h-full transition-all duration-300',
+        variant === 'carousel' ? 'shadow-sm hover:shadow-lg' : 'hover:shadow-md',
+        'hover:-translate-y-1 hover:border-mint-green/30',
+        className
+      )}
+    >
+      {/* Imagen del producto */}
+      <div className="relative pt-[100%] bg-gray-50">
+        <div className="absolute inset-0 overflow-hidden">
+          <Image
+            src={product.image || '/placeholder.svg'}
+            alt={product.name}
+            fill
+            className="object-cover"
+            sizes={variant === 'carousel' ? "(max-width: 640px) 50vw, 33vw" : "(max-width: 640px) 50vw, 25vw"}
           />
-          <span className="sr-only">
-            {isWishlisted ? "Quitar de favoritos" : "Añadir a favoritos"}
-          </span>
-        </Button>
+        </div>
+        
+        {/* Botón de favoritos */}
+        <button
+          onClick={handleToggleWishlist}
+          className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10"
+          aria-label={isWishlisted ? "Quitar de favoritos" : "Añadir a favoritos"}
+        >
+          <Heart 
+            className={cn(
+              "h-5 w-5 transition-colors",
+              isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'
+            )} 
+          />
+        </button>
       </div>
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-playfair font-medium text-lg mb-1 text-mint-green-dark">
+      
+      {/* Contenido */}
+      <div className="p-4">
+        {/* Categoría */}
+        {product.category && (
+          <span className="text-xs text-gray-500 font-medium">
+            {product.category}
+          </span>
+        )}
+        
+        {/* Título */}
+        <h3 className="font-medium text-mint-green-dark mt-1 mb-2 line-clamp-2 h-12 text-base">
           {product.name}
         </h3>
-        <div className="flex mb-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              className={cn(
-                "h-4 w-4",
-                i < Math.floor(product.rating)
-                  ? "text-yellow-400 fill-yellow-400"
-                  : "text-gray-300"
-              )}
-            />
-          ))}
-        </div>
-        <div className="mt-auto">
-          <p className="text-xl font-playfair font-bold mb-2 text-mint-green-dark">
-            {new Intl.NumberFormat("es-ES", {
-              style: "currency",
-              currency: "EUR",
+        
+        {/* Valoración y Precio */}
+        <div className="mb-3">
+          <div className="flex items-center mb-1">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-500 ml-1">({product.rating})</span>
+          </div>
+          <span className="text-lg font-bold text-gray-900">
+            {new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 2
             }).format(product.price)}
-          </p>
-          <Button
+          </span>
+        </div>
+        
+        {/* Botón de añadir al carrito */}
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <Button 
             onClick={handleAddToCart}
-            className="w-full font-poppins bg-mint-green hover:bg-accent-green hover:text-mint-green-dark"
+            className="w-full bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium h-9"
           >
-            Añadir al Carrito
+            Añadir al carrito
           </Button>
         </div>
       </div>

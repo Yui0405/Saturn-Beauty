@@ -3,86 +3,82 @@
 import { useState, useRef, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import ProductCard from "@/components/product-card"
+import ProductCard from "@/components/product-card";
 
-// Sample product data
-const products = [
-  {
-    id: 1,
-    name: "Soft Pinch Tinted Lip Oil",
-    price: 19.99,
-    rating: 5,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 2,
-    name: "Hydrating Face Cream",
-    price: 24.99,
-    rating: 4,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 3,
-    name: "Vitamin C Serum",
-    price: 29.99,
-    rating: 5,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 4,
-    name: "Gentle Cleansing Foam",
-    price: 18.99,
-    rating: 4,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 5,
-    name: "Exfoliating Toner",
-    price: 22.99,
-    rating: 5,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 6,
-    name: "Moisturizing Lip Balm",
-    price: 12.99,
-    rating: 4,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 7,
-    name: "Brightening Eye Cream",
-    price: 27.99,
-    rating: 5,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 8,
-    name: "Nourishing Hair Oil",
-    price: 23.99,
-    rating: 4,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 9,
-    name: "Hydrating Face Mist",
-    price: 16.99,
-    rating: 5,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-  {
-    id: 10,
-    name: "Overnight Sleeping Mask",
-    price: 25.99,
-    rating: 4,
-    image: "/placeholder.svg?height=300&width=300",
-  },
-]
+type Product = {
+  id: string
+  name: string
+  description: string
+  price: number
+  rating: number
+  image: string
+  skinType?: string
+  category?: string
+  stock?: number
+}
 
 export default function ProductCarousel() {
+  const [products, setProducts] = useState<Product[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Handle storage changes to refresh products
+  const handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'saturn-products' && event.newValue) {
+      const updatedProducts = JSON.parse(event.newValue);
+      // Sort by rating (highest first) and take top 10
+      const sortedProducts = [...updatedProducts]
+        .sort((a: Product, b: Product) => b.rating - a.rating)
+        .slice(0, 10);
+      setProducts(sortedProducts);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch top 10 highest rated products
+    const fetchProducts = async () => {
+      try {
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem('saturn-products');
+        
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData);
+          // Sort by rating (highest first) and take top 10
+          const sortedProducts = [...parsedData]
+            .sort((a: Product, b: Product) => b.rating - a.rating)
+            .slice(0, 10);
+          setProducts(sortedProducts);
+        } else {
+          // If no cached data, load from JSON
+          const response = await fetch('/data/products.json');
+          const data = await response.json();
+          
+          // Sort by rating (highest first) and take top 10
+          const sortedProducts = [...data.products]
+            .sort((a: Product, b: Product) => b.rating - a.rating)
+            .slice(0, 10);
+          
+          setProducts(sortedProducts);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+    
+    // Add storage event listener
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {
@@ -97,50 +93,90 @@ export default function ProductCarousel() {
     }
   }, [])
 
-  const visibleProducts = isMobile ? 1 : 3
-  const maxIndex = products.length - visibleProducts
+  const productsToShow = 3; // Always show 3 products at a time
+  const maxIndex = Math.max(0, products.length - productsToShow);
+  const itemWidth = 100 / 3; // Each item takes up 1/3 of the container
 
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0))
-  }
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, maxIndex));
+  };
 
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, maxIndex))
-  }
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => Math.max(0, prevIndex - 1));
+  };
+
+  // Hide next button when showing the last set of products
+  const showNextButton = currentIndex < maxIndex;
+  // Hide prev button when at the start
+  const showPrevButton = currentIndex > 0;
 
   return (
-    <div className="relative">
-      <h2 className="section-title mb-6">Productos Destacados</h2>
+    <div className="relative max-w-5xl mx-auto px-4">
+      <h2 className="section-title mb-4 text-2xl font-playfair">Productos Destacados</h2>
 
-      <div className="relative">
-        <div ref={containerRef} className="overflow-hidden">
-          <div
-            className="flex transition-transform duration-300 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * (100 / visibleProducts)}%)` }}
-          >
-            {products.map((product) => (
-              <div key={product.id} className={cn("flex-shrink-0 px-2", isMobile ? "w-full" : "w-1/3")}>
-                <ProductCard product={product} />
-              </div>
-            ))}
+      <div className="relative -mx-1">
+        {isLoading ? (
+          <div className="w-full py-12 flex justify-center">
+            <div className="animate-pulse text-gray-400">Cargando productos destacados...</div>
           </div>
-        </div>
-
-        <button
-          onClick={handlePrev}
-          disabled={currentIndex === 0}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 -ml-4 bg-white rounded-full p-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed z-10"
-        >
-          <ChevronLeft className="h-6 w-6 text-mint-green-dark" />
-        </button>
-
-        <button
-          onClick={handleNext}
-          disabled={currentIndex === maxIndex}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 -mr-4 bg-white rounded-full p-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed z-10"
-        >
-          <ChevronRight className="h-6 w-6 text-mint-green-dark" />
-        </button>
+        ) : products.length === 0 ? (
+          <div className="w-full py-12 text-center text-gray-500">
+            No se encontraron productos destacados
+          </div>
+        ) : (
+          <div className="relative w-full overflow-hidden group px-1">
+            <div
+              ref={containerRef}
+              className="flex transition-transform duration-300 ease-out"
+              style={{
+                transform: `translateX(-${currentIndex * itemWidth}%)`,
+              }}
+            >
+              {products.map((product, index) => (
+                <div 
+                  key={product.id} 
+                  className="h-full flex-shrink-0"
+                  style={{ width: `${itemWidth}%` }}
+                >
+                  <div className="h-full px-1">
+                    <ProductCard 
+                      product={{
+                        ...product,
+                        id: typeof product.id === 'string' ? parseInt(product.id) : product.id
+                      }}
+                      variant="carousel"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Navigation Buttons */}
+            <div className="absolute inset-0 flex items-center justify-between pointer-events-none">
+              {showPrevButton && (
+                <button
+                  onClick={prevSlide}
+                  className={cn(
+                  "absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg z-10 transition-all duration-200 hover:scale-110 ml-1 pointer-events-auto",
+                  !showPrevButton && "opacity-0"
+                )}>
+                  <ChevronLeft className="h-5 w-5 text-mint-green-dark" />
+                </button>
+              )}
+              
+              {showNextButton && (
+                <button
+                  onClick={nextSlide}
+                  className={cn(
+                  "absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg z-10 transition-all duration-200 hover:scale-110 mr-1 pointer-events-auto",
+                  !showNextButton && "opacity-0"
+                )}>
+                  <ChevronRight className="h-5 w-5 text-mint-green-dark" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
