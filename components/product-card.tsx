@@ -87,9 +87,35 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     
+    // Verificar si el usuario está autenticado
+    if (!isAuthenticated()) {
+      toast({
+        title: "Inicia sesión para continuar",
+        description: "Debes iniciar sesión para agregar productos a favoritos.",
+        variant: "default",
+        action: (
+          <Button 
+            variant="outline" 
+            className="border-mint-green text-mint-green hover:bg-mint-green/10"
+            onClick={() => router.push('/login')}
+          >
+            <LogIn className="h-4 w-4 mr-2" />
+            Iniciar sesión
+          </Button>
+        ),
+      });
+      return;
+    }
+    
+    // Si ya está en favoritos, quitarlo
     if (isWishlisted) {
       removeFromWishlist(productId);
+      toast({
+        title: "Eliminado de favoritos",
+        description: `${product.name} se ha eliminado de tus favoritos.`,
+      });
     } else {
+      // Agregar a favoritos
       addToWishlist({
         id: productId,
         name: product.name,
@@ -97,6 +123,10 @@ export default function ProductCard({
         image: product.image,
         rating: product.rating,
         category: product.category
+      });
+      toast({
+        title: "Agregado a favoritos",
+        description: `${product.name} se ha añadido a tus favoritos.`,
       });
     }
   };

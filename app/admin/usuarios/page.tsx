@@ -72,6 +72,20 @@ export default function UsuariosPage() {
     // Cargar usuarios al montar el componente
     loadUsers();
     
+    // Función para manejar actualizaciones de usuarios
+    const handleUsersUpdated = (event: CustomEvent) => {
+      if (event.detail && event.detail.users) {
+        // Si recibimos usuarios en el evento, actualizamos el estado
+        setUsers(event.detail.users);
+      } else {
+        // Si no, recargamos los usuarios
+        loadFromLocalStorage();
+      }
+    };
+
+    // Escuchar eventos personalizados para actualizar la lista
+    window.addEventListener('usersUpdated', handleUsersUpdated as EventListener);
+    
     // Escuchar eventos de almacenamiento para actualizar la lista cuando cambien los datos
     const handleStorageChange = () => {
       loadFromLocalStorage();
@@ -79,8 +93,9 @@ export default function UsuariosPage() {
     
     window.addEventListener('storage', handleStorageChange);
     
-    // Limpiar el event listener al desmontar el componente
+    // Limpiar los event listeners al desmontar el componente
     return () => {
+      window.removeEventListener('usersUpdated', handleUsersUpdated as EventListener);
       window.removeEventListener('storage', handleStorageChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

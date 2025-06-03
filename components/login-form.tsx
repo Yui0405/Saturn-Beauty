@@ -5,6 +5,7 @@ import type React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -98,40 +99,265 @@ export default function LoginForm() {
     }
   };
 
+  const validateField = (field: string, value: string): string => {
+    switch (field) {
+      case 'name':
+        if (!value.trim()) return 'El nombre es obligatorio';
+        if (!/^[A-ZÁÉÍÓÚÜÑ][a-záéíóúüñ]+(?:\s+[A-ZÁÉÍÓÚÜÑ][a-záéíóúüñ]+)*$/.test(value)) 
+          return 'Cada nombre y apellido debe comenzar con mayúscula y solo contener letras';
+        if (value.length < 3) return 'El nombre debe tener al menos 3 caracteres';
+        if (value.length > 50) return 'El nombre no puede exceder los 50 caracteres';
+        return '';
+        
+      case 'username':
+        if (!value.trim()) return 'El nombre de usuario es obligatorio';
+        if (!/^[a-z0-9_]+$/.test(value)) 
+          return 'El usuario solo puede contener minúsculas, números y guiones bajos';
+        if (value.length < 3) return 'El usuario debe tener al menos 3 caracteres';
+        if (value.length > 20) return 'El usuario no puede exceder los 20 caracteres';
+        return '';
+        
+      case 'email':
+        if (!value.trim()) return 'El correo electrónico es obligatorio';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) 
+          return 'Ingrese un correo electrónico válido';
+        return '';
+        
+      case 'password':
+        if (!value) return 'La contraseña es obligatoria';
+        if (value.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+        if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d\s:])/.test(value))
+          return 'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial';
+        return '';
+        
+      case 'confirmPassword':
+        if (value !== registerData.password) 
+          return 'Las contraseñas no coinciden';
+        return '';
+        
+      default:
+        return '';
+    }
+  };
+
+  const [touched, setTouched] = useState({
+    name: false,
+    username: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
+
+  const [errors, setErrors] = useState({
+    name: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleBlur = (field: string) => {
+    setTouched({ ...touched, [field]: true });
+    const error = validateField(field, registerData[field as keyof typeof registerData]);
+    setErrors({ ...errors, [field]: error });
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    // Aplicar formato según el campo
+    let formattedValue = value;
+    
+    if (field === 'name') {
+      // Capitalizar primera letra de cada palabra
+      if (value) {
+        formattedValue = value
+          .toLowerCase()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+    } else if (field === 'username') {
+      // Convertir a minúsculas
+      formattedValue = value.toLowerCase();
+    }
+    
+    // Actualizar el estado
+    setRegisterData(prev => ({ ...prev, [field]: formattedValue }));
+    
+    // Validar si el campo ha sido tocado
+    if (touched[field as keyof typeof touched]) {
+      const error = validateField(field, formattedValue);
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setIsLoading(true);
-    
+
     try {
-      const result = await register({
-        name: registerData.name,
-        email: registerData.email,
-        username: registerData.username, // Use the username from the form
-        password: registerData.password,
-        confirmPassword: registerData.confirmPassword,
+      // Marcar todos los campos como tocados para mostrar errores
+      const allTouched = {
+        name: true,
+        username: true,
+        email: true,
+        password: true,
+        confirmPassword: true,
+      };
+      
+      setTouched(allTouched);
+
+      // Validar todos los campos
+      const fieldErrors = {} as Record<string, string>;
+      let hasErrors = false;
+
+      Object.keys(registerData).forEach(field => {
+        if (field === 'confirmPassword') return; // Se valida aparte
+        
+        const error = validateField(field, registerData[field as keyof typeof registerData]);
+        if (error) {
+          fieldErrors[field] = error;
+          hasErrors = true;
+        }
       });
 
-      if (result.success) {
-        toast({
-          title: "¡Registro exitoso!",
-          description: result.message,
-        });
+      // Validar confirmación de contraseña
+      if (registerData.password !== registerData.confirmPassword) {
+        fieldErrors.confirmPassword = 'Las contraseñas no coinciden';
+        hasErrors = true;
+      }
+
+      // Si hay errores, mostrarlos
+      if (hasErrors) {
+        setErrors(prev => ({
+          ...prev,
+          ...fieldErrors
+        }));
         
-        // Redirect based on user role (default is 'user' for new registrations)
-        router.push("/");
-      } else {
+        // Desplazarse al primer error
+        const firstErrorField = Object.keys(fieldErrors)[0];
+        if (firstErrorField) {
+          const element = document.getElementById(firstErrorField);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element?.focus();
+          
+          toast({
+            title: "Error de validación",
+            description: "Por favor corrige los errores en el formulario.",
+            variant: "destructive",
+          });
+        }
+        
+        setIsLoading(false);
+        return;
+      }
+
+      // Verificar si el usuario o correo ya existen
+      const storedUsers = localStorage.getItem('saturn-users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+
+      // Obtener usuarios del archivo users.json
+      let jsonUsers = [];
+      try {
+        const response = await fetch('/data/users.json');
+        const data = await response.json();
+        jsonUsers = data.users || [];
+      } catch (error) {
+        console.error('Error al cargar usuarios desde users.json:', error);
+      }
+
+      // Combinar usuarios de localStorage y users.json
+      const allUsers = [...users, ...jsonUsers];
+
+      const userExists = allUsers.some((user: any) => user.username === registerData.username);
+      const emailExists = allUsers.some((user: any) => user.email === registerData.email);
+
+      if (userExists) {
         toast({
-          title: "Error en el registro",
-          description: result.message,
+          title: "Error",
+          description: "El nombre de usuario ya está en uso",
           variant: "destructive",
         });
+        setIsLoading(false);
+        return;
       }
+
+      if (emailExists) {
+        toast({
+          title: "Error",
+          description: "El correo electrónico ya está registrado",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Crear nuevo usuario con todos los campos necesarios
+      const newUser = {
+        id: Date.now().toString(),
+        username: registerData.username,
+        email: registerData.email,
+        password: registerData.password, // En una aplicación real, esto debería estar hasheado
+        name: registerData.name,
+        role: "user",
+        bio: "Nuevo usuario de Saturn Beauty",
+        telefono: "",
+        direccion: "",
+        avatar: "/images/users/default-avatar.png",
+        joinDate: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+        createdAt: new Date().toISOString()
+      };
+
+      // Obtener usuarios existentes de localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('saturn-users') || '[]');
+      
+      // Agregar el nuevo usuario
+      const updatedUsers = [...existingUsers, newUser];
+      
+      // Guardar en localStorage
+      localStorage.setItem('saturn-users', JSON.stringify(updatedUsers));
+      
+      // Disparar evento personalizado para actualizar la interfaz
+      window.dispatchEvent(new CustomEvent('usersUpdated', {
+        detail: { users: updatedUsers }
+      }));
+
+      // También guardar en el archivo users.json (simulado)
+      try {
+        // En un entorno real, aquí harías una llamada a tu API para actualizar la base de datos
+        console.log('Nuevo usuario registrado:', newUser);
+      } catch (error) {
+        console.error('Error al guardar en la base de datos:', error);
+      }
+
+      // Limpiar el formulario
+      setRegisterData({
+        name: "",
+        email: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      // Mostrar mensaje de éxito
+      toast({
+        title: "¡Registro exitoso!",
+        description: "Tu cuenta ha sido creada correctamente. Por favor inicia sesión.",
+      });
+
+      // Cambiar a la pestaña de inicio de sesión
+      const loginTab = document.querySelector('button[data-value="login"]') as HTMLButtonElement;
+      if (loginTab) {
+        loginTab.click();
+      }
+
+      // Hacer scroll al inicio del formulario
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Error en el registro:", error);
       toast({
         title: "Error",
-        description: "Ocurrió un error al registrar el usuario. Por favor, inténtalo de nuevo.",
+        description: "No se pudo completar el registro. Por favor intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -209,66 +435,105 @@ export default function LoginForm() {
           <TabsContent value="register">
             <form onSubmit={handleRegister} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="register-name">Nombre completo</Label>
+                <Label htmlFor="name">Nombre Completo</Label>
                 <Input
-                  id="register-name"
+                  id="name"
                   name="name"
                   type="text"
                   value={registerData.name}
-                  onChange={handleRegisterChange}
+                  onChange={(e) => handleFieldChange('name', e.target.value)}
+                  onBlur={() => handleBlur('name')}
+                  className={errors.name && touched.name ? 'border-red-500' : ''}
                   required
                 />
+                {errors.name && touched.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-email">Correo electrónico</Label>
+                <Label htmlFor="username">Nombre de Usuario</Label>
                 <Input
-                  id="register-email"
-                  name="email"
-                  type="email"
-                  value={registerData.email}
-                  onChange={handleRegisterChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="register-username">Nombre de usuario</Label>
-                <Input
-                  id="register-username"
+                  id="username"
                   name="username"
                   type="text"
                   value={registerData.username}
-                  onChange={handleRegisterChange}
+                  onChange={(e) => handleFieldChange('username', e.target.value)}
+                  onBlur={() => handleBlur('username')}
+                  className={errors.username && touched.username ? 'border-red-500' : ''}
                   required
                 />
+                {errors.username && touched.username && (
+                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-password">Contraseña</Label>
+                <Label htmlFor="email">Correo Electrónico</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={registerData.email}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                  onBlur={() => handleBlur('email')}
+                  className={errors.email && touched.email ? 'border-red-500' : ''}
+                  required
+                />
+                {errors.email && touched.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
                 <PasswordInput
-                  id="register-password"
+                  id="password"
                   name="password"
                   value={registerData.password}
-                  onChange={handleRegisterChange}
+                  onChange={(e) => handleFieldChange('password', e.target.value)}
+                  onBlur={() => handleBlur('password')}
+                  className={`w-full font-poppins ${errors.password && touched.password ? 'border-red-500' : ''}`}
                   required
                 />
+                {errors.password && touched.password ? (
+                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                ) : registerData.password ? (
+                  <p className="mt-1 text-xs text-green-600">La contraseña cumple con los requisitos</p>
+                ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="register-confirm-password">Confirmar Contraseña</Label>
+                <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
                 <PasswordInput
-                  id="register-confirm-password"
+                  id="confirmPassword"
                   name="confirmPassword"
                   value={registerData.confirmPassword}
-                  onChange={handleRegisterChange}
+                  onChange={(e) => handleFieldChange('confirmPassword', e.target.value)}
+                  onBlur={() => handleBlur('confirmPassword')}
+                  className={`w-full font-poppins ${errors.confirmPassword && touched.confirmPassword ? 'border-red-500' : ''}`}
                   required
                 />
+                {errors.confirmPassword && touched.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                )}
+                {!errors.confirmPassword && registerData.confirmPassword && registerData.password === registerData.confirmPassword && (
+                  <p className="mt-1 text-xs text-green-600">Las contraseñas coinciden</p>
+                )}
               </div>
               <Button
                 type="submit"
-                className="w-full h-10 bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-mint-green-dark font-poppins"
+                className="w-full bg-mint-green hover:bg-accent-green hover:text-mint-green-dark"
                 disabled={isLoading}
               >
-                {isLoading ? "Registrando..." : "Registrarse"}
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Registrarse
               </Button>
             </form>
+            <p className="mt-4 text-center text-sm text-gray-600">
+              ¿Ya tienes una cuenta?{" "}
+              <Link href="/login" className="text-mint-green hover:underline">
+                Inicia sesión
+              </Link>
+            </p>
           </TabsContent>
         </Tabs>
       </CardContent>

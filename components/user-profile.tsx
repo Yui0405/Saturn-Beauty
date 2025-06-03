@@ -17,17 +17,45 @@ import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
 import ProductCard from "./product-card"; // Added the missing import
 
-// Enhanced sample user data with realistic order history
-const userData = {
-  name: "María García",
-  email: "maria.garcia@example.com",
-  avatar: "/images/placeholder.svg?height=100&width=100",
-  bio: "Amante de los cosméticos naturales y el cuidado de la piel. Siempre en busca de nuevos productos para mi rutina diaria.",
+// User interface
+export interface UserData {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  bio: string;
+  telefono: string;
+  direccion: string;
+  avatar: string;
+  role: string;
+  joinDate?: string;
+  lastLogin?: string;
+  address?: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
+  paymentMethods?: any[];
+  orders?: any[];
+}
+
+// Default user data
+const defaultUserData: UserData = {
+  id: '',
+  name: 'Usuario',
+  username: 'usuario',
+  email: '',
+  bio: '',
+  telefono: '',
+  direccion: '',
+  avatar: '/images/users/default-avatar.png',
+  role: 'user',
   address: {
-    street: "Calle Belleza 123",
-    city: "Madrid",
-    postalCode: "28001",
-    country: "España",
+    street: '',
+    city: '',
+    postalCode: '',
+    country: 'España',
   },
   paymentMethods: [
     {
@@ -222,12 +250,105 @@ const userData = {
 
 export default function UserProfile({ initialTab = "account" }: { initialTab?: string }) {
   const [activeTab, setActiveTab] = useState(initialTab)
-  const [user, setUser] = useState(userData)
+  const [user, setUser] = useState<UserData>(defaultUserData)
   const [isEditing, setIsEditing] = useState(false)
-  const [editedUser, setEditedUser] = useState(userData)
-  const [isLoading, setIsLoading] = useState(false)
+  const [editedUser, setEditedUser] = useState<UserData>(defaultUserData)
+  const [isLoading, setIsLoading] = useState(true)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<string>('visa')
+  
+  // Load user data on component mount - matches edit user page implementation
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get current user from localStorage
+        const currentUser = typeof window !== 'undefined' ? 
+          JSON.parse(localStorage.getItem('currentUser') || '{}') : null;
+        
+        if (!currentUser?.id) {
+          console.error('No user is logged in');
+          setIsLoading(false);
+          return;
+        }
+
+        // Try to load from localStorage first (matches edit page behavior)
+        const storedUsers = localStorage.getItem('saturn-users');
+        if (storedUsers) {
+          const users = JSON.parse(storedUsers);
+          const foundUser = users.find((u: any) => u.id === currentUser.id);
+          
+          if (foundUser) {
+            const userData = formatUserData(foundUser);
+            setUser(userData);
+            setEditedUser(userData);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // If not in localStorage, load from JSON (matches edit page behavior)
+        try {
+          const response = await fetch('/data/users.json');
+          const data = await response.json();
+          const foundUser = data.users.find((u: any) => u.id === currentUser.id);
+          
+          if (foundUser) {
+            const userData = formatUserData(foundUser);
+            setUser(userData);
+            setEditedUser(userData);
+          } else {
+            console.warn('User not found in users.json, using default data');
+            const defaultData = { ...defaultUserData, id: currentUser.id };
+            setUser(defaultData);
+            setEditedUser(defaultData);
+          }
+        } catch (error) {
+          console.error('Error loading from users.json:', error);
+          throw error;
+        }
+        
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        toast({
+          title: "Error",
+          description: "No se pudo cargar la información del usuario.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Helper function to format user data consistently
+    const formatUserData = (userData: any) => {
+      // Get any locally saved data from localStorage for this user
+      const savedUserData = typeof window !== 'undefined' ? 
+        JSON.parse(localStorage.getItem(`user_${userData.id}`) || '{}') : {};
+      
+      // Merge data sources with priority: localStorage > fetched data > defaults
+      return {
+        ...defaultUserData,
+        ...userData,
+        ...savedUserData,
+        id: userData.id,
+        // Handle address merging
+        address: {
+          street: '',
+          city: '',
+          postalCode: '',
+          country: 'España',
+          ...(savedUserData.address || {}),
+          ...(userData.address || {})
+        },
+        // Keep legacy fields for compatibility
+        direccion: savedUserData.direccion || userData.direccion || ''
+      };
+    };
+    
+    loadUserData();
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { items: wishlistItems, removeItem: removeFromWishlist } = useWishlist()
   const [currentPage, setCurrentPage] = useState(1)
@@ -302,25 +423,102 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
     }
   }
 
-  const handleSaveProfile = () => {
-    setIsLoading(true)
-
-    setTimeout(() => {
-      if (typeof window !== "undefined" && avatarPreview) {
-        localStorage.setItem("userAvatar", avatarPreview)
-        window.dispatchEvent(new Event("storage"))
+  const handleSaveProfile = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Get current user
+      const currentUser = typeof window !== 'undefined' ? 
+        JSON.parse(localStorage.getItem('currentUser') || '{}') : null;
+      
+      if (!currentUser?.id) {
+        throw new Error('No user is logged in');
       }
-
-      setUser(editedUser)
-      setIsEditing(false)
-      setIsLoading(false)
-      setAvatarPreview(null)
+      
+      // Create a clean copy of the edited user data
+      const userToSave = { ...editedUser };
+      
+      // Handle avatar update
+      if (avatarPreview) {
+        // Save avatar to localStorage
+        const avatarKey = `user_${currentUser.id}_avatar`;
+        localStorage.setItem(avatarKey, avatarPreview);
+        userToSave.avatar = avatarPreview;
+      }
+      
+      // Update users array in localStorage (matching edit page behavior)
+      const storedUsers = localStorage.getItem('saturn-users');
+      let users = [];
+      
+      if (storedUsers) {
+        users = JSON.parse(storedUsers);
+        const userIndex = users.findIndex((u: any) => u.id === currentUser.id);
+        
+        if (userIndex !== -1) {
+          // Update existing user
+          users[userIndex] = {
+            ...users[userIndex],
+            ...userToSave,
+            // Don't override password
+            password: users[userIndex].password
+          };
+        } else {
+          // Add new user (shouldn't normally happen)
+          users.push(userToSave);
+        }
+      } else {
+        // First user
+        users = [userToSave];
+      }
+      
+      // Save updated users array
+      localStorage.setItem('saturn-users', JSON.stringify(users));
+      
+      // Also save user data individually for easy access
+      localStorage.setItem(`user_${currentUser.id}`, JSON.stringify({
+        ...userToSave,
+        // Don't save password in individual storage
+        password: undefined
+      }));
+      
+      // Update current user in localStorage if needed
+      if (currentUser.id === userToSave.id) {
+        localStorage.setItem('currentUser', JSON.stringify({
+          ...currentUser,
+          name: userToSave.name,
+          email: userToSave.email,
+          avatar: userToSave.avatar
+        }));
+      }
+      
+      // Update state
+      setUser(userToSave);
+      
+      // Show success message
       toast({
         title: "Perfil actualizado",
-        description: "Tus cambios han sido guardados correctamente.",
-      })
-    }, 1500)
-  }
+        description: "Tus cambios se han guardado correctamente.",
+        variant: "default"
+      });
+      
+      // Exit edit mode
+      setIsEditing(false);
+      setAvatarPreview(null);
+      
+      // Refresh the page to ensure all data is up to date
+      window.dispatchEvent(new Event('storage'));
+      
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo guardar la información del perfil. Por favor, inténtalo de nuevo.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     toast({
@@ -557,23 +755,39 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                     <div className="space-y-4 font-poppins">
                       <div>
                         <h3 className="font-medium text-mint-green-dark">Nombre</h3>
-                        <p>{user.name}</p>
+                        <p data-component-name="UserProfile">{isLoading ? 'Cargando...' : user.name || 'No disponible'}</p>
                       </div>
                       <div>
                         <h3 className="font-medium text-mint-green-dark">Correo Electrónico</h3>
-                        <p>{user.email}</p>
+                        <p data-component-name="UserProfile">{isLoading ? 'Cargando...' : user.email || 'No disponible'}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-mint-green-dark">Teléfono</h3>
+                        <p data-component-name="UserProfile">{isLoading ? 'Cargando...' : user.telefono || 'No especificado'}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-mint-green-dark">Usuario</h3>
+                        <p>@{user.username || 'usuario'}</p>
                       </div>
                       <div>
                         <h3 className="font-medium text-mint-green-dark">Biografía</h3>
-                        <p>{user.bio}</p>
+                        <p className="whitespace-pre-line">{isLoading ? 'Cargando...' : user.bio || 'No hay biografía'}</p>
                       </div>
                       <div>
-                        <h3 className="font-medium text-gray-500">Dirección</h3>
-                        <p>{user.address.street}</p>
-                        <p>
-                          {user.address.city}, {user.address.postalCode}
-                        </p>
-                        <p>{user.address.country}</p>
+                        <h3 className="font-medium text-mint-green-dark">Dirección</h3>
+                        {isLoading ? (
+                          <p>Cargando...</p>
+                        ) : user.address?.street || user.direccion ? (
+                          <div>
+                            <p>{user.address?.street || user.direccion}</p>
+                            {user.address?.city && user.address?.postalCode && (
+                              <p>{user.address.city}, {user.address.postalCode}</p>
+                            )}
+                            {user.address?.country && <p>{user.address.country}</p>}
+                          </div>
+                        ) : (
+                          <p>No se ha especificado una dirección</p>
+                        )}
                       </div>
                     </div>
                   ) : (
@@ -604,28 +818,44 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                         />
                       </div>
                       <div className="space-y-2">
+                        <Label htmlFor="telefono" className="font-poppins">
+                          Teléfono
+                        </Label>
+                        <Input
+                          id="telefono"
+                          name="telefono"
+                          type="tel"
+                          value={editedUser.telefono || ''}
+                          onChange={handleInputChange}
+                          className="font-poppins"
+                          placeholder="+34 123 456 789"
+                        />
+                      </div>
+                      <div className="space-y-2">
                         <Label htmlFor="bio" className="font-poppins">
                           Biografía
                         </Label>
                         <Textarea
                           id="bio"
                           name="bio"
-                          value={editedUser.bio}
+                          value={editedUser.bio || ''}
                           onChange={handleInputChange}
                           rows={3}
                           className="font-poppins"
+                          placeholder="Cuéntanos un poco sobre ti..."
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="address.street" className="font-poppins">
-                          Calle
+                          Dirección
                         </Label>
                         <Input
                           id="address.street"
                           name="address.street"
-                          value={editedUser.address.street}
+                          value={editedUser.address?.street || editedUser.direccion || ''}
                           onChange={handleInputChange}
                           className="font-poppins"
+                          placeholder="Calle y número"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -636,9 +866,10 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                           <Input
                             id="address.city"
                             name="address.city"
-                            value={editedUser.address.city}
+                            value={editedUser.address?.city || ''}
                             onChange={handleInputChange}
                             className="font-poppins"
+                            placeholder="Ciudad"
                           />
                         </div>
                         <div className="space-y-2">
@@ -648,9 +879,10 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                           <Input
                             id="address.postalCode"
                             name="address.postalCode"
-                            value={editedUser.address.postalCode}
+                            value={editedUser.address?.postalCode || ''}
                             onChange={handleInputChange}
                             className="font-poppins"
+                            placeholder="Código postal"
                           />
                         </div>
                       </div>
@@ -661,10 +893,14 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                         <Input
                           id="address.country"
                           name="address.country"
-                          value={editedUser.address.country}
+                          value={editedUser.address?.country || 'España'}
                           onChange={handleInputChange}
                           className="font-poppins"
+                          placeholder="País"
                         />
+                      </div>
+                      <div className="text-sm text-gray-500 pt-2">
+                        <p>Los cambios se guardarán automáticamente al hacer clic en "Guardar Cambios".</p>
                       </div>
                     </div>
                   )}

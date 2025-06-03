@@ -520,8 +520,7 @@ export default function CommunityFeed() {
                   </Button>
                 ) : (
                   <Button
-                    variant="outline"
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-mint-green border-mint-green hover:bg-mint-green/10 text-sm font-medium h-10"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground px-4 py-2 bg-mint-green hover:bg-accent-green hover:text-mint-green-dark text-sm font-medium h-10"
                     onClick={() => {
                       toast({
                         title: "Inicia sesión para publicar",
@@ -572,12 +571,9 @@ export default function CommunityFeed() {
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <Link
-                        href={`/usuario/${post.user.id}`}
-                        className="font-playfair font-medium hover:text-mint-green"
-                      >
-                        {post.user.name}
-                      </Link>
+                      <span className="font-playfair font-medium">
+                      {post.user.name}
+                    </span>
                       {isCurrentUserPost(post.user.id) && (
                         <div className="relative">
                           <Button
@@ -694,12 +690,9 @@ export default function CommunityFeed() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <Link
-                              href={`/usuario/${comment.user.id}`}
-                              className="font-playfair font-medium hover:text-mint-green"
-                            >
+                            <span className="font-playfair font-medium">
                               {comment.user.name}
-                            </Link>
+                            </span>
                             <p className="text-gray-800 font-poppins">
                               {comment.content}
                             </p>

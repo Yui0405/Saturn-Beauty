@@ -31,6 +31,7 @@ import {
 import NotificationsPanel from "@/components/notifications-panel";
 import { useNotifications } from "@/contexts/notification-context";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 
 // Obtener la foto de perfil del usuario desde la sesión
 const getUserAvatar = (session: any) => {
@@ -59,6 +60,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { totalItems, toggleCart } = useCart();
+  const { toast } = useToast();
   const [userAvatar, setUserAvatar] = useState(
     "/images/users/default-avatar.png"
   );
@@ -199,13 +201,54 @@ export default function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="p-0">
-                  <Link href="/perfil" className="w-full px-2 py-1.5">
+                <DropdownMenuItem 
+                  className="p-0"
+                  onClick={(e) => {
+                    if (!isAuthenticated) {
+                      e.preventDefault();
+                      toast({
+                        title: "Inicia sesión",
+                        description: "Debes iniciar sesión para acceder a tu perfil.",
+                        action: (
+                          <Button 
+                            variant="outline" 
+                            className="border-mint-green text-mint-green hover:bg-mint-green/10"
+                            onClick={() => window.location.href = '/login'}
+                          >
+                            <LogIn className="h-4 w-4 mr-2" />
+                            Iniciar sesión
+                          </Button>
+                        ),
+                      });
+                    }
+                  }}
+                >
+                  <Link href={isAuthenticated ? "/perfil" : "#"} className="w-full px-2 py-1.5">
                     Mi Perfil
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/perfil?tab=orders" className="w-full">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    if (!isAuthenticated) {
+                      e.preventDefault();
+                      toast({
+                        title: "Inicia sesión",
+                        description: "Debes iniciar sesión para ver tus pedidos.",
+                        action: (
+                          <Button 
+                            variant="outline" 
+                            className="border-mint-green text-mint-green hover:bg-mint-green/10"
+                            onClick={() => window.location.href = '/login'}
+                          >
+                            <LogIn className="h-4 w-4 mr-2" />
+                            Iniciar sesión
+                          </Button>
+                        ),
+                      });
+                    }
+                  }}
+                >
+                  <Link href={isAuthenticated ? "/perfil?tab=orders" : "#"} className="w-full">
                     Mis Pedidos
                   </Link>
                 </DropdownMenuItem>
