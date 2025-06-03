@@ -92,28 +92,51 @@ export default function UsuariosPage() {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
+      setError(null);
 
       let usersData: User[] = [];
       const storedUsers = localStorage.getItem('saturn-users');
       
       if (storedUsers) {
-        usersData = JSON.parse(storedUsers);
-      } else {
-        const response = await fetch("/data/users.json");
-        if (!response.ok) throw new Error("Error cargando usuarios desde el archivo");
-        
-        const data = await response.json();
-        usersData = data.users || [];
-        localStorage.setItem('saturn-users', JSON.stringify(usersData));
+        try {
+          usersData = JSON.parse(storedUsers);
+        } catch (e) {
+          console.warn("Error al analizar usuarios del localStorage:", e);
+          localStorage.removeItem('saturn-users');
+        }
       }
-      
+
+      try {
+        const response = await fetch("/data/users.json");
+        if (response.ok) {
+          const data = await response.json();
+          const jsonUsers = data.users || [];
+          
+          const combinedUsers = [...usersData];
+          
+          jsonUsers.forEach((jsonUser: User) => {
+            const exists = combinedUsers.some(u => u.id === jsonUser.id);
+            if (!exists) {
+              combinedUsers.push(jsonUser);
+            }
+          });
+
+          if (combinedUsers.length > 0) {
+            localStorage.setItem('saturn-users', JSON.stringify(combinedUsers));
+            usersData = combinedUsers;
+          }
+        }
+      } catch (syncError) {
+        console.warn("No se pudo cargar el archivo JSON de usuarios:", syncError);
+      }
+
       const formattedUsers = usersData.map(user => ({
         id: user.id,
         username: user.username || '',
         email: user.email || '',
         role: (user.role === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
         name: user.name || '',
-        avatar: user.avatar || '/placeholder.svg',
+        avatar: user.avatar || '/images/placeholder.svg',
         bio: user.bio || '',
         telefono: user.telefono || '',
         direccion: user.direccion || '',
@@ -122,29 +145,9 @@ export default function UsuariosPage() {
         lastLogin: user.lastLogin || new Date().toISOString(),
         createdAt: user.createdAt || new Date().toISOString()
       }));
-      
+
       setUsers(formattedUsers);
-      setError(null);
-      
-      if (!storedUsers) {
-        try {
-          const response = await fetch("/data/users.json?t=" + new Date().getTime());
-          if (response.ok) {
-            const data = await response.json();
-            if (data.users && data.users.length > 0) {
-              localStorage.setItem('saturn-users', JSON.stringify(data.users));
-              setUsers(data.users.map((user: any) => ({
-                ...user,
-                joinDate: user.joinDate || new Date().toISOString(),
-                role: user.role || 'user'
-              })));
-            }
-          }
-        } catch (syncError) {
-          console.warn("No se pudo sincronizar con el archivo JSON:", syncError);
-        }
-      }
-      
+
     } catch (err) {
       console.error("Error loading users:", err);
       setError(err as Error);

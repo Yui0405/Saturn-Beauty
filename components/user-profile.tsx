@@ -614,7 +614,6 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                     ))}
                   </div>
                   
-                  {/* Controles de paginación */}
                   {totalPages > 1 && (
                     <div className="flex flex-col sm:flex-row justify-between items-center mt-8 pt-4 border-t border-gray-200">
                       <div className="flex items-center gap-2 mb-4 sm:mb-0">

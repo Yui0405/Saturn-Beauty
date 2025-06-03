@@ -163,11 +163,9 @@ export default function LoginForm() {
   };
 
   const handleFieldChange = (field: string, value: string) => {
-    // Aplicar formato según el campo
     let formattedValue = value;
     
     if (field === 'name') {
-      // Capitalizar primera letra de cada palabra
       if (value) {
         formattedValue = value
           .toLowerCase()
@@ -176,14 +174,11 @@ export default function LoginForm() {
           .join(' ');
       }
     } else if (field === 'username') {
-      // Convertir a minúsculas
       formattedValue = value.toLowerCase();
     }
     
-    // Actualizar el estado
     setRegisterData(prev => ({ ...prev, [field]: formattedValue }));
     
-    // Validar si el campo ha sido tocado
     if (touched[field as keyof typeof touched]) {
       const error = validateField(field, formattedValue);
       setErrors(prev => ({ ...prev, [field]: error }));
@@ -195,7 +190,6 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      // Marcar todos los campos como tocados para mostrar errores
       const allTouched = {
         name: true,
         username: true,
@@ -206,12 +200,11 @@ export default function LoginForm() {
       
       setTouched(allTouched);
 
-      // Validar todos los campos
       const fieldErrors = {} as Record<string, string>;
       let hasErrors = false;
 
       Object.keys(registerData).forEach(field => {
-        if (field === 'confirmPassword') return; // Se valida aparte
+        if (field === 'confirmPassword') return;
         
         const error = validateField(field, registerData[field as keyof typeof registerData]);
         if (error) {
@@ -220,20 +213,17 @@ export default function LoginForm() {
         }
       });
 
-      // Validar confirmación de contraseña
       if (registerData.password !== registerData.confirmPassword) {
         fieldErrors.confirmPassword = 'Las contraseñas no coinciden';
         hasErrors = true;
       }
 
-      // Si hay errores, mostrarlos
       if (hasErrors) {
         setErrors(prev => ({
           ...prev,
           ...fieldErrors
         }));
         
-        // Desplazarse al primer error
         const firstErrorField = Object.keys(fieldErrors)[0];
         if (firstErrorField) {
           const element = document.getElementById(firstErrorField);
@@ -251,11 +241,9 @@ export default function LoginForm() {
         return;
       }
 
-      // Verificar si el usuario o correo ya existen
       const storedUsers = localStorage.getItem('saturn-users');
       const users = storedUsers ? JSON.parse(storedUsers) : [];
 
-      // Obtener usuarios del archivo users.json
       let jsonUsers = [];
       try {
         const response = await fetch('/data/users.json');
@@ -265,7 +253,6 @@ export default function LoginForm() {
         console.error('Error al cargar usuarios desde users.json:', error);
       }
 
-      // Combinar usuarios de localStorage y users.json
       const allUsers = [...users, ...jsonUsers];
 
       const userExists = allUsers.some((user: any) => user.username === registerData.username);
@@ -291,46 +278,38 @@ export default function LoginForm() {
         return;
       }
 
-      // Crear nuevo usuario con todos los campos necesarios
       const newUser = {
         id: Date.now().toString(),
         username: registerData.username,
         email: registerData.email,
-        password: registerData.password, // En una aplicación real, esto debería estar hasheado
+        password: registerData.password,
         name: registerData.name,
         role: "user",
         bio: "Nuevo usuario de Saturn Beauty",
         telefono: "",
         direccion: "",
-        avatar: "/images/users/default-avatar.png",
+        avatar: "/images/placeholder.svg",
         joinDate: new Date().toISOString(),
         lastLogin: new Date().toISOString(),
         createdAt: new Date().toISOString()
       };
 
-      // Obtener usuarios existentes de localStorage
       const existingUsers = JSON.parse(localStorage.getItem('saturn-users') || '[]');
       
-      // Agregar el nuevo usuario
       const updatedUsers = [...existingUsers, newUser];
       
-      // Guardar en localStorage
       localStorage.setItem('saturn-users', JSON.stringify(updatedUsers));
       
-      // Disparar evento personalizado para actualizar la interfaz
       window.dispatchEvent(new CustomEvent('usersUpdated', {
         detail: { users: updatedUsers }
       }));
 
-      // También guardar en el archivo users.json (simulado)
       try {
-        // En un entorno real, aquí harías una llamada a tu API para actualizar la base de datos
         console.log('Nuevo usuario registrado:', newUser);
       } catch (error) {
         console.error('Error al guardar en la base de datos:', error);
       }
 
-      // Limpiar el formulario
       setRegisterData({
         name: "",
         email: "",
@@ -339,19 +318,16 @@ export default function LoginForm() {
         confirmPassword: "",
       });
 
-      // Mostrar mensaje de éxito
       toast({
         title: "¡Registro exitoso!",
         description: "Tu cuenta ha sido creada correctamente. Por favor inicia sesión.",
       });
 
-      // Cambiar a la pestaña de inicio de sesión
       const loginTab = document.querySelector('button[data-value="login"]') as HTMLButtonElement;
       if (loginTab) {
         loginTab.click();
       }
 
-      // Hacer scroll al inicio del formulario
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error("Error en el registro:", error);

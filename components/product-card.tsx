@@ -133,7 +133,6 @@ export default function ProductCard({
         'hover:shadow-md hover:-translate-y-0.5 hover:border-mint-green/30',
         className
       )}>
-        {/* Imagen del producto */}
         <div className="relative w-full sm:w-48 h-48 sm:h-auto bg-gray-50 flex-shrink-0">
           <Image
             src={product.image || '/placeholder.svg'}
@@ -142,7 +141,6 @@ export default function ProductCard({
             className="object-cover"
             sizes="(max-width: 640px) 100vw, 192px"
           />
-          {/* Botón de favoritos */}
           <button
             onClick={handleToggleWishlist}
             className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10"
@@ -156,8 +154,6 @@ export default function ProductCard({
             />
           </button>
         </div>
-        
-        {/* Contenido */}
         <div className="flex flex-col flex-1 p-4">
           <div className="flex-1">
             {product.category && (
@@ -230,7 +226,6 @@ export default function ProductCard({
         className
       )}
     >
-      {/* Imagen del producto */}
       <div className="relative pt-[100%] bg-gray-50">
         <div className="absolute inset-0 overflow-hidden">
           <Image
@@ -242,7 +237,6 @@ export default function ProductCard({
           />
         </div>
         
-        {/* Botón de favoritos */}
         <button
           onClick={handleToggleWishlist}
           className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10"
@@ -257,21 +251,17 @@ export default function ProductCard({
         </button>
       </div>
       
-      {/* Contenido */}
       <div className="p-4">
-        {/* Categoría */}
         {product.category && (
           <span className="text-xs text-gray-500 font-medium">
             {product.category}
           </span>
         )}
         
-        {/* Título */}
         <h3 className="font-medium text-mint-green-dark mt-1 mb-2 line-clamp-2 h-12 text-base">
           {product.name}
         </h3>
         
-        {/* Valoración y Precio */}
         <div className="mb-3">
           <div className="flex items-center mb-1">
             <div className="flex">
@@ -303,7 +293,6 @@ export default function ProductCard({
           )}
         </div>
         
-        {/* Botón de añadir al carrito */}
         <div className="mt-4 pt-3 border-t border-gray-100">
           <Button 
             onClick={handleAddToCart}
