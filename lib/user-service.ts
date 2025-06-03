@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 
-// Simple password hashing using SHA-256
+
 function hashPassword(password: string): string {
   return createHash("sha256").update(password).digest("hex");
 }
@@ -18,17 +18,16 @@ export interface User {
   password: string;
   joinDate: string;
   lastLogin: string;
-  createdAt?: string; // Mantener para compatibilidad
-  updatedAt?: string; // Track when user was last updated
+  createdAt?: string; 
+  updatedAt?: string; 
 }
 
-// Función auxiliar para cargar usuarios iniciales si no existen
+
 const getInitialUsers = (): User[] => {
   try {
-    // Intentar cargar desde el archivo JSON primero
     if (typeof window !== 'undefined') {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', '/data/users.json', false); // Sincrónico
+      xhr.open('GET', '/data/users.json', false); 
       xhr.send();
       
       if (xhr.status === 200) {
@@ -42,7 +41,6 @@ const getInitialUsers = (): User[] => {
     console.error('Error al cargar usuarios iniciales:', error);
   }
   
-  // Datos por defecto si no se puede cargar el archivo
   return [
     {
       id: "1",

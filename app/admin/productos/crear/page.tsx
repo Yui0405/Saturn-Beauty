@@ -51,19 +51,14 @@ export default function CreateProductPage() {
     stock: "",
   });
   
-  // Handle field blur
   const handleBlur = (field: string) => {
     setTouched({ ...touched, [field]: true });
     const error = validateField(field, formData[field as keyof typeof formData]);
     setErrors({ ...errors, [field]: error });
   };
-  
-  // Handle field change with validation
+
   const handleFieldChange = (field: string, value: any) => {
-    // Update form data
     setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Only validate if the field has been touched
     if (touched[field as keyof typeof touched]) {
       const error = validateField(field, value);
       setErrors(prev => ({ ...prev, [field]: error }));
@@ -119,7 +114,6 @@ export default function CreateProductPage() {
   };
   const [previewImage, setPreviewImage] = useState("/images/placeholder.svg");
 
-  // Mark all fields as touched when form is submitted
   const markAllAsTouched = () => {
     setTouched({
       name: true,
@@ -132,10 +126,8 @@ export default function CreateProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Mark all fields as touched to show all errors
     markAllAsTouched();
     
-    // Validate all fields
     const isFormValid = validateForm();
     
     if (!isFormValid) {
@@ -150,33 +142,27 @@ export default function CreateProductPage() {
     setIsLoading(true);
 
     try {
-      // Cargar productos existentes desde localStorage o desde el JSON si no hay datos
       let existingProducts: Product[] = [];
       const cachedData = localStorage.getItem('saturn-products');
       
       if (cachedData) {
         existingProducts = JSON.parse(cachedData);
       } else {
-        // Si no hay datos en localStorage, cargamos del JSON
         const response = await fetch("/data/products.json");
         if (!response.ok) throw new Error("Error cargando productos");
         const data = await response.json();
         existingProducts = data.products;
       }
 
-      // Generar un ID único para el nuevo producto (usando timestamp)
       const newProduct: Product = {
         ...formData,
-        id: `${Date.now()}`, // Convertimos a string para mantener consistencia con el formato del JSON
+        id: `${Date.now()}`, 
       };
 
-      // Añadir el nuevo producto al array existente
       const updatedProducts = [...existingProducts, newProduct];
       
-      // Guardar en localStorage
       localStorage.setItem('saturn-products', JSON.stringify(updatedProducts));
       
-      // Disparar evento personalizado para actualizar el contador en tiempo real
       window.dispatchEvent(new Event('productsUpdated'));
 
       toast({
@@ -262,16 +248,13 @@ export default function CreateProductPage() {
             value={formData.rating}
             onChange={(e) => {
               const value = e.target.value;
-              // Allow empty string for better UX when deleting
               if (value === '') {
                 handleFieldChange('rating', '');
                 return;
               }
               
-              // Allow typing decimal points and numbers
               if (/^\d*\.?\d*$/.test(value)) {
                 const numValue = parseFloat(value);
-                // Only update if it's a valid number within range or in the process of typing
                 if (isNaN(numValue) || (numValue >= 1 && numValue <= 5)) {
                   handleFieldChange('rating', value);
                 }
@@ -397,7 +380,6 @@ export default function CreateProductPage() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Validate file size (max 5MB)
                   if (file.size > 5 * 1024 * 1024) {
                     toast({
                       title: "Error",
@@ -407,7 +389,6 @@ export default function CreateProductPage() {
                     return;
                   }
 
-                  // Validate file type
                   const validTypes = ["image/jpeg", "image/png", "image/webp"];
                   if (!validTypes.includes(file.type)) {
                     toast({
@@ -419,12 +400,9 @@ export default function CreateProductPage() {
                     return;
                   }
 
-                  // Create temporary preview URL
                   const previewUrl = URL.createObjectURL(file);
                   setPreviewImage(previewUrl);
 
-                  // In a real app, we would upload the file to a server.
-                  // For now, we'll just use the preview URL
                   setFormData((prev) => ({
                     ...prev,
                     image: previewUrl,

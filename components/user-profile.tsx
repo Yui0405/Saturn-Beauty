@@ -15,9 +15,8 @@ import { toast } from "@/hooks/use-toast"
 import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X, ChevronLeft, ChevronRight, Eye, EyeOff, PackageOpen } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
-import ProductCard from "./product-card"; // Added the missing import
+import ProductCard from "./product-card"; 
 
-// User interface
 export interface UserData {
   id: string;
   name: string;
@@ -40,7 +39,6 @@ export interface UserData {
   orders?: any[];
 }
 
-// Default user data
 const defaultUserData: UserData = {
   id: '1',
   name: 'Luisa Rodríguez',
@@ -257,31 +255,30 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<string>('visa')
   
-  // Load user data on component mount - matches edit user page implementation
+  
   useEffect(() => {
     const loadUserData = async () => {
       try {
         setIsLoading(true);
         
-        // Get current user from localStorage or use default user
+
         let currentUser = typeof window !== 'undefined' ? 
           JSON.parse(localStorage.getItem('currentUser') || '{}') : null;
         
-        // If no user is logged in, use default user data
+
         if (!currentUser?.id) {
           console.log('No user logged in, using default user');
           currentUser = defaultUserData;
-          // Save default user to localStorage
+
           if (typeof window !== 'undefined') {
             localStorage.setItem('currentUser', JSON.stringify(defaultUserData));
           }
         }
 
-        // Try to load from localStorage first (matches edit page behavior)
+
         const storedUsers = localStorage.getItem('saturn-users');
         let userData = null;
 
-        // 1. Try to find user in localStorage
         if (storedUsers) {
           const users = JSON.parse(storedUsers);
           const foundUser = users.find((u: any) => u.id === currentUser.id);
@@ -290,7 +287,6 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
           }
         }
 
-        // 2. If not found in localStorage, try to load from users.json
         if (!userData) {
           try {
             const response = await fetch('/data/users.json');
@@ -314,7 +310,6 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
           }
         }
 
-        // 3. If still no data, use currentUser from localStorage
         if (!userData) {
           userData = {
             ...defaultUserData,
@@ -341,19 +336,16 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
       }
     };
 
-    // Helper function to format user data consistently
     const formatUserData = (userData: any) => {
-      // Get any locally saved data from localStorage for this user
       const savedUserData = typeof window !== 'undefined' ? 
         JSON.parse(localStorage.getItem(`user_${userData.id}`) || '{}') : {};
       
-      // Merge data sources with priority: localStorage > fetched data > defaults
       return {
         ...defaultUserData,
         ...userData,
         ...savedUserData,
         id: userData.id,
-        // Handle address merging
+
         address: {
           street: '',
           city: '',
@@ -362,7 +354,7 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
           ...(savedUserData.address || {}),
           ...(userData.address || {})
         },
-        // Keep legacy fields for compatibility
+
         direccion: savedUserData.direccion || userData.direccion || ''
       };
     };
@@ -372,21 +364,20 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { items: wishlistItems, removeItem: removeFromWishlist } = useWishlist()
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(6) // Mostrar 6 productos por página
+  const [itemsPerPage] = useState(6) 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  // Calcular los productos a mostrar en la página actual
   const indexOfLastItem = currentPage * itemsPerPage
   const indexOfFirstItem = indexOfLastItem - itemsPerPage
   const currentItems = wishlistItems.slice(indexOfFirstItem, indexOfLastItem)
   const totalPages = Math.ceil(wishlistItems.length / itemsPerPage)
 
-  // Cambiar de página
+
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   
-  // Resetear a la primera página cuando cambie la lista de deseos
+
   useEffect(() => {
     setCurrentPage(1)
   }, [wishlistItems.length])
@@ -402,7 +393,6 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
       const [parent, child] = name.split(".");
       
       setEditedUser((prev) => {
-        // Asegurarnos de que prev[parent] sea tratado como un objeto
         const parentValue = prev[parent as keyof typeof prev];
         const parentObject = parentValue && typeof parentValue === 'object' && !Array.isArray(parentValue)
           ? { ...parentValue }
@@ -447,26 +437,22 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
     try {
       setIsLoading(true);
       
-      // Get current user
+
       const currentUser = typeof window !== 'undefined' ? 
         JSON.parse(localStorage.getItem('currentUser') || '{}') : null;
       
       if (!currentUser?.id) {
         throw new Error('No user is logged in');
       }
-      
-      // Create a clean copy of the edited user data
+
       const userToSave = { ...editedUser };
-      
-      // Handle avatar update
+
       if (avatarPreview) {
-        // Save avatar to localStorage
         const avatarKey = `user_${currentUser.id}_avatar`;
         localStorage.setItem(avatarKey, avatarPreview);
         userToSave.avatar = avatarPreview;
       }
       
-      // Update users array in localStorage (matching edit page behavior)
       const storedUsers = localStorage.getItem('saturn-users');
       let users = [];
       
@@ -475,33 +461,24 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
         const userIndex = users.findIndex((u: any) => u.id === currentUser.id);
         
         if (userIndex !== -1) {
-          // Update existing user
           users[userIndex] = {
             ...users[userIndex],
             ...userToSave,
-            // Don't override password
             password: users[userIndex].password
           };
         } else {
-          // Add new user (shouldn't normally happen)
           users.push(userToSave);
         }
       } else {
-        // First user
         users = [userToSave];
       }
       
-      // Save updated users array
       localStorage.setItem('saturn-users', JSON.stringify(users));
-      
-      // Also save user data individually for easy access
       localStorage.setItem(`user_${currentUser.id}`, JSON.stringify({
         ...userToSave,
-        // Don't save password in individual storage
         password: undefined
       }));
       
-      // Update current user in localStorage if needed
       if (currentUser.id === userToSave.id) {
         localStorage.setItem('currentUser', JSON.stringify({
           ...currentUser,
@@ -510,22 +487,14 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
           avatar: userToSave.avatar
         }));
       }
-      
-      // Update state
       setUser(userToSave);
-      
-      // Show success message
       toast({
         title: "Perfil actualizado",
         description: "Tus cambios se han guardado correctamente.",
         variant: "default"
       });
-      
-      // Exit edit mode
       setIsEditing(false);
       setAvatarPreview(null);
-      
-      // Refresh the page to ensure all data is up to date
       window.dispatchEvent(new Event('storage'));
       
     } catch (error) {

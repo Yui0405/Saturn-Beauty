@@ -47,7 +47,6 @@ export default function EditarProductoPage({
     stock: "",
   });
   
-  // Validate a single field
   const validateField = (field: string, value: any): string => {
     switch (field) {
       case 'name':
@@ -83,7 +82,6 @@ export default function EditarProductoPage({
     }
   };
   
-  // Handle field blur
   const handleBlur = (field: string) => {
     if (!product) return;
     setTouched(prev => ({ ...prev, [field]: true }));
@@ -91,21 +89,17 @@ export default function EditarProductoPage({
     setErrors(prev => ({ ...prev, [field]: error }));
   };
   
-  // Handle field change with validation
   const handleFieldChange = (field: string, value: any) => {
     if (!product) return;
     
-    // Update product data
     setProduct({ ...product, [field]: value });
     
-    // Only validate if the field has been touched
     if (touched[field as keyof typeof touched]) {
       const error = validateField(field, value);
       setErrors(prev => ({ ...prev, [field]: error }));
     }
   };
   
-  // Mark all fields as touched when form is submitted
   const markAllAsTouched = () => {
     setTouched({
       name: true,
@@ -137,14 +131,12 @@ export default function EditarProductoPage({
         setIsLoading(true);
         let foundProduct: Product | undefined;
         
-        // 1. Buscar primero en localStorage
         const cachedData = localStorage.getItem('saturn-products');
         if (cachedData) {
           const products = JSON.parse(cachedData);
           foundProduct = products.find((p: Product) => p.id === params.id);
         }
         
-        // 2. Si no se encuentra, buscar en el JSON
         if (!foundProduct) {
           const response = await fetch("/data/products.json");
           const data = await response.json();
@@ -153,7 +145,6 @@ export default function EditarProductoPage({
 
         if (foundProduct) {
           setProduct(foundProduct);
-          // Asegurarse de que siempre haya una imagen de vista previa
           setPreviewImage(foundProduct.image || "/images/placeholder.svg");
         } else {
           toast({
@@ -180,11 +171,7 @@ export default function EditarProductoPage({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product) return;
-    
-    // Mark all fields as touched to show all errors
     markAllAsTouched();
-    
-    // Validate all fields
     const isFormValid = validateForm();
     
     if (!isFormValid) {
@@ -198,35 +185,28 @@ export default function EditarProductoPage({
 
     try {
       setIsLoading(true);
-
-      // Cargar productos existentes desde localStorage o desde el JSON si no hay datos
       let existingProducts: Product[] = [];
       const cachedData = localStorage.getItem('saturn-products');
       
       if (cachedData) {
         existingProducts = JSON.parse(cachedData);
       } else {
-        // Si no hay datos en localStorage, cargamos del JSON
         const response = await fetch("/data/products.json");
         if (!response.ok) throw new Error("Error cargando productos");
         const data = await response.json();
         existingProducts = data.products;
       }
 
-      // Encontrar el índice del producto a actualizar
       const productIndex = existingProducts.findIndex(p => p.id === product.id);
       
       if (productIndex === -1) {
         throw new Error("Producto no encontrado");
       }
 
-      // Actualizar el producto en el array
       existingProducts[productIndex] = product;
       
-      // Guardar en localStorage
       localStorage.setItem('saturn-products', JSON.stringify(existingProducts));
       
-      // Disparar evento personalizado para actualizar el contador en tiempo real
       window.dispatchEvent(new Event('productsUpdated'));
 
       toast({
@@ -322,16 +302,13 @@ export default function EditarProductoPage({
               value={product.rating}
               onChange={(e) => {
                 const value = e.target.value;
-                // Allow empty string for better UX when deleting
                 if (value === '') {
                   handleFieldChange('rating', '');
                   return;
                 }
                 
-                // Allow typing decimal points and numbers
                 if (/^\d*\.?\d*$/.test(value)) {
                   const numValue = parseFloat(value);
-                  // Only update if it's a valid number within range or in the process of typing
                   if (isNaN(numValue) || (numValue >= 1 && numValue <= 5)) {
                     handleFieldChange('rating', value);
                   }
@@ -457,7 +434,6 @@ export default function EditarProductoPage({
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  // Validate file size (max 5MB)
                   if (file.size > 5 * 1024 * 1024) {
                     toast({
                       title: "Error",
@@ -467,7 +443,6 @@ export default function EditarProductoPage({
                     return;
                   }
 
-                  // Validate file type
                   const validTypes = ["image/jpeg", "image/png", "image/webp"];
                   if (!validTypes.includes(file.type)) {
                     toast({
@@ -479,7 +454,6 @@ export default function EditarProductoPage({
                     return;
                   }
 
-                  // Create temporary preview URL
                   const previewUrl = URL.createObjectURL(file);
                   setPreviewImage(previewUrl);
                   setProduct({ ...product, image: previewUrl });

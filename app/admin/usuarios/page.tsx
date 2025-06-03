@@ -44,7 +44,6 @@ export default function UsuariosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Función para cargar usuarios desde localStorage
   const loadFromLocalStorage = () => {
     const storedUsers = localStorage.getItem('saturn-users');
     if (storedUsers) {
@@ -69,62 +68,45 @@ export default function UsuariosPage() {
   };
 
   useEffect(() => {
-    // Cargar usuarios al montar el componente
     loadUsers();
-    
-    // Función para manejar actualizaciones de usuarios
     const handleUsersUpdated = (event: CustomEvent) => {
       if (event.detail && event.detail.users) {
-        // Si recibimos usuarios en el evento, actualizamos el estado
         setUsers(event.detail.users);
       } else {
-        // Si no, recargamos los usuarios
         loadFromLocalStorage();
       }
     };
-
-    // Escuchar eventos personalizados para actualizar la lista
     window.addEventListener('usersUpdated', handleUsersUpdated as EventListener);
-    
-    // Escuchar eventos de almacenamiento para actualizar la lista cuando cambien los datos
     const handleStorageChange = () => {
       loadFromLocalStorage();
     };
     
     window.addEventListener('storage', handleStorageChange);
     
-    // Limpiar los event listeners al desmontar el componente
     return () => {
       window.removeEventListener('usersUpdated', handleUsersUpdated as EventListener);
       window.removeEventListener('storage', handleStorageChange);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadUsers = async () => {
     try {
       setIsLoading(true);
-      
-      // 1. Primero intentar cargar desde localStorage
+
       let usersData: User[] = [];
       const storedUsers = localStorage.getItem('saturn-users');
       
       if (storedUsers) {
-        // Si hay datos en localStorage, usarlos
         usersData = JSON.parse(storedUsers);
       } else {
-        // 2. Si no hay datos en localStorage, cargar desde el archivo JSON
         const response = await fetch("/data/users.json");
         if (!response.ok) throw new Error("Error cargando usuarios desde el archivo");
         
         const data = await response.json();
         usersData = data.users || [];
-        
-        // Guardar en localStorage para futuras cargas
         localStorage.setItem('saturn-users', JSON.stringify(usersData));
       }
       
-      // Asegurarse de que los datos tengan el formato correcto
       const formattedUsers = usersData.map(user => ({
         id: user.id,
         username: user.username || '',
@@ -144,7 +126,6 @@ export default function UsuariosPage() {
       setUsers(formattedUsers);
       setError(null);
       
-      // 3. Cargar en segundo plano desde el JSON para sincronizar (solo si no hay datos en localStorage)
       if (!storedUsers) {
         try {
           const response = await fetch("/data/users.json?t=" + new Date().getTime());
@@ -172,8 +153,7 @@ export default function UsuariosPage() {
         description: "No se pudieron cargar los usuarios. Mostrando datos locales.",
         variant: "destructive",
       });
-      
-      // Último intento: cargar datos iniciales
+
       try {
         const initialUsers = readUsers();
         setUsers(initialUsers);
@@ -187,7 +167,7 @@ export default function UsuariosPage() {
 
   const handleDelete = (id: string) => {
     try {
-      // No permitir eliminar al administrador principal
+
       const userToDelete = users.find((user) => user.id === id);
       if (userToDelete?.username === "lisbethAdmin") {
         toast({

@@ -1,4 +1,3 @@
-// Modificar para permitir la selección de tabs desde la URL
 "use client"
 
 import { useSearchParams } from "next/navigation"

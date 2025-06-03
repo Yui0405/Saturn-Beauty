@@ -49,7 +49,6 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     
-    // Check if user is authenticated
     if (!isAuthenticated()) {
       toast({
         title: "Inicia sesión para continuar",
@@ -69,7 +68,6 @@ export default function ProductCard({
       return;
     }
     
-    // Add item to cart if user is authenticated
     addItem({
       id: productId,
       name: product.name,
@@ -87,7 +85,6 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     
-    // Verificar si el usuario está autenticado
     if (!isAuthenticated()) {
       toast({
         title: "Inicia sesión para continuar",
@@ -107,7 +104,6 @@ export default function ProductCard({
       return;
     }
     
-    // Si ya está en favoritos, quitarlo
     if (isWishlisted) {
       removeFromWishlist(productId);
       toast({
@@ -115,7 +111,6 @@ export default function ProductCard({
         description: `${product.name} se ha eliminado de tus favoritos.`,
       });
     } else {
-      // Agregar a favoritos
       addToWishlist({
         id: productId,
         name: product.name,
@@ -226,7 +221,6 @@ export default function ProductCard({
     );
   }
 
-  // Vista de cuadrícula (por defecto)
   return (
     <div 
       className={cn(

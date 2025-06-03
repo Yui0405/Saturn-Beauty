@@ -39,35 +39,26 @@ export default function CheckoutPage() {
     cardExpiry: ""
   })
 
-  // Cargar datos del usuario al montar el componente
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Verificar si el usuario está autenticado
       if (!isAuthenticated()) {
         router.push('/login?redirect=/checkout')
         return
       }
-
-      // Obtener datos del usuario actual
       const currentUser = getCurrentUser()
       if (currentUser) {
-        // Obtener datos completos del usuario desde localStorage
         const storedUsers = localStorage.getItem('saturn-users')
         if (storedUsers) {
           const users = JSON.parse(storedUsers)
           const fullUser = users.find((u: any) => u.id === currentUser.id)
           
           if (fullUser) {
-            // Actualizar el formulario con los datos del usuario
             setFormData(prev => ({
               ...prev,
               name: fullUser.name || '',
               email: fullUser.email || '',
               address: fullUser.direccion || ''
             }))
-
-
-            // Validar si el usuario tiene dirección
             if (!fullUser.direccion) {
               setAddressError('Por favor, actualiza tu dirección en tu perfil antes de continuar con la compra.')
             }
@@ -79,17 +70,13 @@ export default function CheckoutPage() {
     }
   }, [router])
 
-  // Redirigir al perfil si no hay dirección
   const handleUpdateAddress = () => {
     router.push('/perfil')
   }
 
   const validateCardNumber = (number: string) => {
-    // Eliminar espacios y guiones
     const cleanNumber = number.replace(/\s+/g, '').replace(/-/g, '')
-    // Validar que solo contenga números
     if (!/^\d+$/.test(cleanNumber)) return "El número de tarjeta solo puede contener dígitos"
-    // Validar longitud (generalmente entre 13 y 19 dígitos)
     if (cleanNumber.length < 13 || cleanNumber.length > 19) return "Número de tarjeta inválido"
     return ""
   }
@@ -117,36 +104,26 @@ export default function CheckoutPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    
-    // Formateo en tiempo real
-    let formattedValue = value
-    
+    const { name, value } = e.target   
+    let formattedValue = value    
     if (name === 'cardNumber') {
-      // Formatear como XXXX XXXX XXXX XXXX
       formattedValue = value
         .replace(/\D/g, '')
         .replace(/(\d{4})/g, '$1 ')
         .trim()
         .slice(0, 19)
-      
-      // Validar el número de tarjeta
       const error = validateCardNumber(value)
       setValidationErrors(prev => ({ ...prev, cardNumber: error }))
     } 
     else if (name === 'cardName') {
-      // Validar el nombre en tiempo real
       const error = validateCardName(value)
       setValidationErrors(prev => ({ ...prev, cardName: error }))
     }
     else if (name === 'cardExpiry') {
-      // Formatear como MM/AA
       formattedValue = value
         .replace(/\D/g, '')
         .replace(/(\d{2})(\d{0,4})/, '$1/$2')
         .slice(0, 5)
-      
-      // Validar la fecha de expiración
       const error = validateExpiryDate(formattedValue)
       setValidationErrors(prev => ({ ...prev, cardExpiry: error }))
     }
@@ -166,8 +143,6 @@ export default function CheckoutPage() {
     }
     
     setValidationErrors(errors)
-    
-    // Verificar si hay algún error
     return !Object.values(errors).some(error => error !== "")
   }
 
@@ -181,8 +156,6 @@ export default function CheckoutPage() {
         })
         return
       }
-      
-      // Validar que la dirección no esté vacía
       if (!formData.address.trim()) {
         toast({
           title: "Error",
@@ -191,8 +164,6 @@ export default function CheckoutPage() {
         })
         return
       }
-      
-      // Actualizar la dirección del usuario en localStorage
       const currentUser = getCurrentUser()
       if (currentUser) {
         const storedUsers = localStorage.getItem('saturn-users')
@@ -203,7 +174,7 @@ export default function CheckoutPage() {
           if (userIndex !== -1) {
             users[userIndex].direccion = formData.address
             localStorage.setItem('saturn-users', JSON.stringify(users))
-            setAddressError('') // Limpiar el mensaje de error si existía
+            setAddressError('')
           }
         }
       }
@@ -233,23 +204,14 @@ export default function CheckoutPage() {
 
   const saveOrderToJson = async (orderData: any) => {
     try {
-      // Leer el archivo orders.json actual
       const response = await fetch('/data/orders.json')
       const data = await response.json()
-      
-      // Agregar el nuevo pedido
       data.orders.push(orderData)
-      
-      // Guardar de vuelta al archivo (esto solo funciona en un entorno con acceso al sistema de archivos)
-      // En producción, necesitarías una API para manejar esto
       console.log('Nuevo pedido creado:', orderData)
-      
-      // También guardar en localStorage para consistencia
       localStorage.setItem('saturn-orders', JSON.stringify(data.orders))
       
     } catch (error) {
       console.error('Error al guardar el pedido:', error)
-      // En caso de error, solo guardar en localStorage
       const orders = JSON.parse(localStorage.getItem('saturn-orders') || '[]')
       orders.push(orderData)
       localStorage.setItem('saturn-orders', JSON.stringify(orders))
@@ -271,13 +233,10 @@ export default function CheckoutPage() {
     setLoading(true)
 
     try {
-      // Obtener datos del usuario actual
       const currentUser = getCurrentUser()
       if (!currentUser) {
         throw new Error('No se pudo obtener la información del usuario')
       }
-
-      // Crear el objeto de pedido
       const orderId = generateOrderId()
       const orderCode = generateOrderCode()
       
@@ -287,7 +246,7 @@ export default function CheckoutPage() {
         userId: currentUser.id,
         userName: currentUser.name || formData.name,
         date: new Date().toISOString(),
-        status: 'en proceso', // Estado por defecto
+        status: 'en proceso',
         total: totalPrice,
         products: items.map(item => ({
           id: item.id,
@@ -299,23 +258,13 @@ export default function CheckoutPage() {
         paymentMethod: formData.paymentMethod,
         paymentDetails: {
           cardLastFour: formData.cardNumber.slice(-4),
-          cardBrand: '' // Podrías detectar la marca de la tarjeta si lo deseas
+          cardBrand: '' 
         }
       }
-
-      // Guardar el pedido
       await saveOrderToJson(orderData)
-      
-      // Guardar el total antes de limpiar el carrito
       setOrderTotal(totalPrice)
-      
-      // Actualizar el estado
       setOrderNumber(orderCode)
-      
-      // Limpiar carrito después de la compra exitosa
       clearCart()
-      
-      // Navegar al paso de confirmación
       setStep(4)
       
       toast({
@@ -338,8 +287,6 @@ export default function CheckoutPage() {
   const handleBackToShopping = () => {
     router.push("/")
   }
-
-  // Si no hay items en el carrito, redirigir a la página principal
   if (items.length === 0 && step !== 4) {
     return (
       <div className="min-h-screen py-12 flex flex-col items-center justify-center">
@@ -356,8 +303,6 @@ export default function CheckoutPage() {
       </div>
     )
   }
-
-  // Mostrar cargando mientras se verifican los datos del usuario
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl flex justify-center items-center min-h-[60vh]">
@@ -368,8 +313,6 @@ export default function CheckoutPage() {
       </div>
     )
   }
-
-  // Si hay error de dirección, mostrar mensaje y botón para actualizar
   if (addressError) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -478,7 +421,6 @@ export default function CheckoutPage() {
                       value={formData.address}
                       onChange={(e) => {
                         handleChange(e)
-                        // Limpiar el error si el usuario empieza a escribir
                         if (addressError) setAddressError('')
                       }}
                       required

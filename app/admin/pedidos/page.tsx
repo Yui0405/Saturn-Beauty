@@ -11,11 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Función para generar un código de pedido único
 function generateOrderCode(): string {
-  const prefix = "SB"; // Saturn Beauty
-  const timestamp = Date.now().toString(36).toUpperCase(); // Timestamp en base 36
-  const random = Math.random().toString(36).substring(2, 5).toUpperCase(); // 3 caracteres aleatorios
+  const prefix = "SB"; 
+  const timestamp = Date.now().toString(36).toUpperCase(); 
+  const random = Math.random().toString(36).substring(2, 5).toUpperCase(); 
   return `${prefix}-${timestamp}${random}`;
 }
 
@@ -51,23 +50,19 @@ export default function PedidosPage() {
     try {
       setIsLoading(true);
       
-      // Primero intentamos cargar desde localStorage
       const cachedData = localStorage.getItem('saturn-orders');
       
       if (cachedData) {
-        // Si hay datos en localStorage, los usamos
         const parsedData = JSON.parse(cachedData);
         setOrders(parsedData);
         console.log('Pedidos cargados desde localStorage:', parsedData.length);
       } else {
-        // Si no hay datos en localStorage, cargamos del JSON
         const response = await fetch("/data/orders.json");
         if (!response.ok) throw new Error("Error cargando pedidos");
 
         const data = await response.json();
         setOrders(data.orders);
         
-        // Guardamos en localStorage para futuras cargas
         localStorage.setItem('saturn-orders', JSON.stringify(data.orders));
         console.log('Pedidos cargados desde JSON y guardados en localStorage');
       }
@@ -118,16 +113,12 @@ export default function PedidosPage() {
         order.id === orderId ? { ...order, status: newStatus } : order
       );
 
-      // Optimistic update
       setOrders(updatedOrders);
       
-      // Save to localStorage
       localStorage.setItem('saturn-orders', JSON.stringify(updatedOrders));
       
-      // Dispatch event to update order count in real-time
       window.dispatchEvent(new Event('ordersUpdated'));
 
-      // Persist changes to JSON file
       await saveOrdersToFile(updatedOrders);
 
       toast({
@@ -135,9 +126,7 @@ export default function PedidosPage() {
         description: "Estado del pedido actualizado correctamente",
       });
     } catch (error) {
-      // Revert on error
       setOrders(previousOrders);
-      // Restore to localStorage on error
       localStorage.setItem('saturn-orders', JSON.stringify(previousOrders));
       toast({
         title: "Error",
@@ -147,7 +136,6 @@ export default function PedidosPage() {
     }
   };
 
-  // Función vacía para cumplir con la interfaz de AdminDataTable
   const handleDelete = (id: string) => {};
   const columns = [
     {

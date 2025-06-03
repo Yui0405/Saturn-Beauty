@@ -83,13 +83,10 @@ export default function EditUserPage() {
   };
 
   const handleFieldChange = (field: string, value: string) => {
-    // Aplicar formato según el campo
     let formattedValue = value;
     
     if (field === 'name') {
-      // Solo formatear si el valor no está vacío para evitar borrar el último carácter
       if (value) {
-        // Capitalizar primera letra de cada palabra
         formattedValue = value
           .toLowerCase()
           .split(' ')
@@ -97,24 +94,19 @@ export default function EditUserPage() {
           .join(' ');
       }
     } else if (field === 'username') {
-      // Convertir a minúsculas
       formattedValue = value.toLowerCase();
     }
     
-    // Actualizar el estado
     setFormData(prev => ({ ...prev, [field]: formattedValue }));
     
-    // Validar si el campo ha sido tocado
     if (touched[field as keyof typeof touched]) {
       const error = validateField(field, formattedValue);
       setErrors(prev => ({ ...prev, [field]: error }));
     }
   };
 
-  // Cargar usuario al iniciar
   useEffect(() => {
     const loadUser = () => {
-      // Asegurarse de que params.id sea un string
       const userId = Array.isArray(params.id) ? params.id[0] : params.id;
       
       if (!userId) {
@@ -128,7 +120,6 @@ export default function EditUserPage() {
       }
 
       try {
-        // Intentar cargar desde localStorage primero
         const storedUsers = localStorage.getItem('saturn-users');
         if (storedUsers) {
           const users = JSON.parse(storedUsers);
@@ -149,7 +140,6 @@ export default function EditUserPage() {
           }
         }
 
-        // Si no está en localStorage, cargar desde el JSON
         fetch("/data/users.json")
           .then(res => res.json())
           .then(data => {
@@ -185,12 +175,9 @@ export default function EditUserPage() {
     loadUser();
   }, [params.id, router]);
 
-  // Manejar cambio de imagen
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Error",
@@ -200,7 +187,6 @@ export default function EditUserPage() {
       return;
     }
 
-    // Validar tamaño (máx 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast({
         title: "Error",
@@ -210,7 +196,6 @@ export default function EditUserPage() {
       return;
     }
 
-    // Crear URL de previsualización
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result as string;
@@ -227,7 +212,6 @@ export default function EditUserPage() {
     try {
       setIsLoading(true);
 
-      // Marcar todos los campos como tocados para mostrar errores
       const allTouched = {
         username: true,
         email: true,
@@ -236,7 +220,6 @@ export default function EditUserPage() {
       
       setTouched(allTouched);
 
-      // Validar todos los campos
       const fieldErrors = {} as Record<string, string>;
       let hasErrors = false;
 
@@ -248,14 +231,12 @@ export default function EditUserPage() {
         }
       });
 
-      // Si hay errores, mostrarlos
       if (hasErrors) {
         setErrors(prev => ({
           ...prev,
           ...fieldErrors
         }));
         
-        // Desplazarse al primer error
         const firstErrorField = Object.keys(fieldErrors)[0];
         if (firstErrorField) {
           const element = document.getElementById(firstErrorField);
@@ -273,20 +254,17 @@ export default function EditUserPage() {
         return;
       }
 
-      // Obtener usuarios actuales
       let users: User[] = [];
       const storedUsers = localStorage.getItem('saturn-users');
       
       if (storedUsers) {
         users = JSON.parse(storedUsers);
       } else {
-        // Si no hay usuarios en localStorage, cargar desde el JSON
         const response = await fetch("/data/users.json");
         const data = await response.json();
         users = data.users || [];
       }
 
-      // Verificar si el nombre de usuario ya existe (excluyendo el usuario actual)
       const usernameExists = users.some(
         (u: User) => u.id !== params.id && u.username === formData.username
       );
@@ -311,7 +289,6 @@ export default function EditUserPage() {
         return;
       }
 
-      // Verificar si el correo electrónico ya existe (excluyendo el usuario actual)
       const emailExists = users.some(
         (u: User) => u.id !== params.id && u.email === formData.email
       );
@@ -336,7 +313,6 @@ export default function EditUserPage() {
         return;
       }
 
-      // Crear el objeto de usuario actualizado
       const updatedUser: User = {
         ...user,
         username: formData.username,
@@ -347,29 +323,22 @@ export default function EditUserPage() {
         lastLogin: new Date().toISOString()
       };
 
-      // Actualizar usuario en el array
       const updatedUsers = users.map((u: User) => 
         u.id === params.id ? updatedUser : u
       );
 
-      // Guardar en localStorage
       localStorage.setItem('saturn-users', JSON.stringify(updatedUsers));
       
-      // Disparar evento personalizado para actualizar el contador en tiempo real
       window.dispatchEvent(new Event('usersUpdated'));
 
-      // Actualizar el estado local
       setUser(updatedUser);
       
-      // Mostrar mensaje de éxito
       toast({
         title: "¡Usuario actualizado!",
         description: `Los datos de ${formData.name} han sido actualizados.`,
       });
 
-      // Redirigir a la lista de usuarios después de 1 segundo
       setTimeout(() => {
-        // Forzar recarga de la página de lista para asegurar que se vean los cambios
         window.dispatchEvent(new Event('storage'));
         router.push("/admin/usuarios");
       }, 1000);
