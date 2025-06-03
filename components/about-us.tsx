@@ -3,7 +3,7 @@
 import type React from "react"
 import Image from "next/image"
 
-// Datos del equipo
+
 const teamMembers = [
   {
     id: 1,
@@ -35,14 +35,7 @@ const teamMembers = [
   },
 ]
 
-/**
- * This component renders the "About Us" page for Saturn Beauty,
- * showcasing the company's history, values, team members, and commitments.
- * It includes various sections with descriptive text and images, highlighting
- * the brand's mission to celebrate natural beauty, sustainability, inclusion,
- * and high-quality products. The page is structured using responsive grid layouts
- * to provide a visually appealing and informative experience.
- */
+
 export default function AboutUs() {
 
   return (

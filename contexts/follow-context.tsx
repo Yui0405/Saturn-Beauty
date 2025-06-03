@@ -25,7 +25,7 @@ type FollowContextType = {
   getUserById: (userId: number) => User | undefined
 }
 
-// Sample users data
+
 const sampleUsers: User[] = [
   {
     id: 1,
@@ -84,7 +84,7 @@ export const FollowProvider = ({ children }: { children: React.ReactNode }) => {
   const [followers, setFollowers] = useState<User[]>([])
   const { addNotification } = useNotifications()
 
-  // Load followed users from localStorage on mount
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedFollowedUsers = localStorage.getItem("followedUsers")
@@ -97,8 +97,8 @@ export const FollowProvider = ({ children }: { children: React.ReactNode }) => {
           console.error("Error parsing followed users from localStorage", error)
         }
       } else {
-        // Initialize with some sample followed users
-        const initialFollowed = [sampleUsers[1], sampleUsers[4]] // Following Laura and Elena
+
+        const initialFollowed = [sampleUsers[1], sampleUsers[4]] 
         setFollowedUsers(initialFollowed)
       }
 
@@ -109,14 +109,13 @@ export const FollowProvider = ({ children }: { children: React.ReactNode }) => {
           console.error("Error parsing followers from localStorage", error)
         }
       } else {
-        // Initialize with some sample followers
-        const initialFollowers = [sampleUsers[2], sampleUsers[3], sampleUsers[5]] // Carmen, Ana, and Sofía follow us
+        const initialFollowers = [sampleUsers[2], sampleUsers[3], sampleUsers[5]] 
         setFollowers(initialFollowers)
       }
     }
   }, [])
 
-  // Save to localStorage whenever followedUsers or followers change
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("followedUsers", JSON.stringify(followedUsers))
@@ -137,7 +136,7 @@ export const FollowProvider = ({ children }: { children: React.ReactNode }) => {
     if (!isFollowing(user.id)) {
       setFollowedUsers((prev) => [...prev, user])
 
-      // Add notification for the followed user (simulated)
+    
       addNotification({
         type: "follow",
         title: "Nuevo seguidor",
@@ -200,5 +199,5 @@ export const useFollow = () => {
   return context
 }
 
-// Export the sample users for use in other components
+
 export { sampleUsers }

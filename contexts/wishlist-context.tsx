@@ -26,10 +26,7 @@ const WishlistContext = createContext<WishlistContextType | undefined>(undefined
 export const WishlistProvider = ({ children }: { children: React.ReactNode }) => {
   const [items, setItems] = useState<WishlistItem[]>([])
 
-  // Asegurarnos de que los datos de la wishlist se guarden en localStorage para persistencia
-  // Añadir después de la declaración del estado items
-
-  // Cargar items de localStorage al iniciar
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedItems = localStorage.getItem("wishlistItems")
@@ -43,7 +40,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, [])
 
-  // Guardar items en localStorage cuando cambien
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("wishlistItems", JSON.stringify(items))
@@ -52,7 +49,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
 
   const addItem = (newItem: WishlistItem) => {
     setItems((prevItems) => {
-      // Verificar si el item ya existe en la lista de deseos
+
       const exists = prevItems.some((item) => item.id === newItem.id)
 
       if (exists) {
@@ -62,7 +59,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
       }
     })
     
-    // Mover el toast fuera del setState
+
     if (!items.some(item => item.id === newItem.id)) {
       toast({
         title: "Añadido a favoritos",
@@ -74,7 +71,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
   const removeItem = (id: number) => {
     setItems((prevItems) => {
       const itemToRemove = prevItems.find((item) => item.id === id)
-      // Mostrar el toast solo si el item existe
+
       if (itemToRemove) {
         setTimeout(() => {
           toast({

@@ -36,14 +36,14 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([])
 
-  // Load notifications from localStorage on mount
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedNotifications = localStorage.getItem("notifications")
       if (savedNotifications) {
         try {
           const parsed = JSON.parse(savedNotifications)
-          // Convert timestamp strings back to Date objects
+          
           const notificationsWithDates = parsed.map((notif: any) => ({
             ...notif,
             timestamp: new Date(notif.timestamp),
@@ -53,14 +53,14 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
           console.error("Error parsing notifications from localStorage", error)
         }
       } else {
-        // Initialize with some sample notifications
+        
         const sampleNotifications: Notification[] = [
           {
             id: "1",
             type: "comment",
             title: "Nuevo comentario",
             message: "Laura Martínez comentó en tu publicación sobre el Soft Pinch Liquid Blush",
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), 
             read: false,
             userId: 2,
             postId: 1,
@@ -72,7 +72,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "post",
             title: "Nueva publicación",
             message: "Carmen Rodríguez ha publicado sobre rutinas de cuidado nocturno",
-            timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+            timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), 
             read: false,
             userId: 3,
             postId: 2,
@@ -84,7 +84,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "mention",
             title: "Te mencionaron",
             message: "Ana López te mencionó en un comentario sobre productos para piel sensible",
-            timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+            timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), 
             read: true,
             userId: 4,
             commentId: 3,
@@ -96,7 +96,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "like",
             title: "Me gusta en tu publicación",
             message: "A Elena Sánchez le gustó tu publicación sobre el sérum de vitamina C",
-            timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8 hours ago
+            timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000), 
             read: true,
             userId: 5,
             postId: 2,
@@ -108,7 +108,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "post",
             title: "Nueva publicación",
             message: "Sofía Fernández compartió su experiencia con productos naturales",
-            timestamp: new Date(Date.now() - 10 * 60 * 60 * 1000), // 10 hours ago
+            timestamp: new Date(Date.now() - 10 * 60 * 60 * 1000), 
             read: false,
             userId: 6,
             postId: 3,
@@ -120,7 +120,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "comment",
             title: "Nuevo comentario",
             message: "María García respondió a tu comentario en la publicación sobre mascarillas",
-            timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
+            timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000), 
             read: true,
             userId: 1,
             postId: 4,
@@ -132,7 +132,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "order",
             title: "Pedido enviado",
             message: "Tu pedido #ORD-12345 ha sido enviado y llegará en 3-5 días hábiles",
-            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), 
             read: false,
             actionUrl: "/perfil?tab=orders",
           },
@@ -141,7 +141,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
             type: "post",
             title: "Nueva publicación",
             message: "Laura Martínez publicó un tutorial de maquillaje para principiantes",
-            timestamp: new Date(Date.now() - 36 * 60 * 60 * 1000), // 1.5 days ago
+            timestamp: new Date(Date.now() - 36 * 60 * 60 * 1000), 
             read: true,
             userId: 2,
             postId: 5,
@@ -154,7 +154,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     }
   }, [])
 
-  // Save notifications to localStorage whenever they change
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("notifications", JSON.stringify(notifications))
@@ -173,7 +173,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
 
     setNotifications((prev) => [newNotification, ...prev])
 
-    // Show toast notification
+
     toast({
       title: newNotification.title,
       description: newNotification.message,
