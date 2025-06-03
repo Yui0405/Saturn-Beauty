@@ -33,14 +33,14 @@ import { useNotifications } from "@/contexts/notification-context";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 
-// Obtener la foto de perfil del usuario desde la sesión
+
 const getUserAvatar = (session: any) => {
-  // Si hay una sesión activa y tiene avatar, usarlo
+
   if (session?.avatar) {
     return session.avatar;
   }
   
-  // Si hay un avatar en localStorage, usarlo
+
   if (typeof window !== "undefined") {
     const storedAvatar = localStorage.getItem("userAvatar");
     if (storedAvatar) {
@@ -48,7 +48,6 @@ const getUserAvatar = (session: any) => {
     }
   }
   
-  // Usar una imagen por defecto si no hay avatar
   return "/images/users/default-avatar.png";
 };
 
@@ -71,11 +70,11 @@ export default function Header() {
 
   const handleLogout = () => {
     logout();
-    // Redirigir a la página de inicio
+    
     window.location.href = "/";
   };
 
-  // Efecto para manejar el scroll y eventos de almacenamiento
+  
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -85,18 +84,17 @@ export default function Header() {
       setUserAvatar(getUserAvatar(session));
     };
     
-    // Configurar event listeners
+    
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("storage", handleStorageChange);
     
-    // Limpiar event listeners al desmontar
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, [session]); // Añadimos session como dependencia
+  }, [session]);
   
-  // Efecto para actualizar el avatar cuando cambia la sesión
+  
   useEffect(() => {
     setUserAvatar(getUserAvatar(session));
   }, [session]);
@@ -110,13 +108,12 @@ export default function Header() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implementar búsqueda
+   
     console.log("Buscando:", searchQuery);
     setSearchOpen(false);
   };
 
-  // Añadir una función para abrir/cerrar el panel de notificaciones
-  // Añadir después de otras funciones como handleSearch
+    
   const toggleNotificationsPanel = () => {
     setNotificationsPanelOpen(!notificationsPanelOpen);
   };

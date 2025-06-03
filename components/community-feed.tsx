@@ -59,7 +59,7 @@ interface Post {
   user?: User;
 }
 
-// Default user for fallback
+
 const defaultUser: User = {
   id: '0',
   name: 'Usuario',
@@ -69,7 +69,7 @@ const defaultUser: User = {
   role: 'user'
 };
 
-// Function to format date to relative time
+
 const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
@@ -118,7 +118,6 @@ export default function CommunityFeed() {
       try {
         setLoading(true);
         
-        // Fetch posts and users in parallel
         const [postsRes, usersRes] = await Promise.all([
           fetch('/data/posts.json'),
           fetch('/data/users.json')
@@ -131,19 +130,15 @@ export default function CommunityFeed() {
         const { posts: postsData } = await postsRes.json();
         const { users } = await usersRes.json();
         
-        // Get user posts from localStorage
         const userPosts = JSON.parse(localStorage.getItem('userPosts') || '[]');
         
-        // Create a map of users by ID for quick lookup
         const usersMap = new Map(users.map((user: User) => [user.id, user]));
         
-        // Add current user to users map if not present
         const currentUser = session || JSON.parse(localStorage.getItem('user') || '{}');
         if (currentUser?.id) {
           usersMap.set(currentUser.id, currentUser);
         }
 
-        // Process posts from JSON
         const postsFromJson = postsData.map((post: Post) => ({
           ...post,
           user: usersMap.get(post.userId.toString()) || defaultUser,
@@ -155,7 +150,6 @@ export default function CommunityFeed() {
           timestamp: formatRelativeTime(post.createdAt)
         }));
         
-        // Process user posts from localStorage
         const processedUserPosts = userPosts.map((post: any) => ({
           ...post,
           user: post.user || defaultUser,
@@ -164,7 +158,6 @@ export default function CommunityFeed() {
           timestamp: formatRelativeTime(post.createdAt)
         }));
         
-        // Combine and sort by date (newest first)
         const allPosts = [...processedUserPosts, ...postsFromJson].sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
@@ -222,7 +215,7 @@ export default function CommunityFeed() {
                 {
                   id: Date.now(),
                   user: {
-                    id: 0, // Current user
+                    id: 0, 
                     name: "Tú",
                     avatar: "/placeholder.svg?height=40&width=40",
                   },
@@ -234,7 +227,7 @@ export default function CommunityFeed() {
       )
     );
 
-    // Add notification for the post owner (if not commenting on own post)
+      
     if (post && post.user.id !== 0) {
       addNotification({
         type: "comment",
@@ -253,7 +246,7 @@ export default function CommunityFeed() {
   const handleAddPost = () => {
     if (!newPostContent.trim() && !postImage) return;
 
-    // Get user data from session or localStorage
+    
     const sessionUser = session || JSON.parse(localStorage.getItem('user') || '{}');
     
     const newPost = {
@@ -276,11 +269,11 @@ export default function CommunityFeed() {
       timestamp: formatRelativeTime(new Date().toISOString())
     };
 
-    // Save to localStorage
+    
     const savedPosts = JSON.parse(localStorage.getItem('userPosts') || '[]');
     localStorage.setItem('userPosts', JSON.stringify([newPost, ...savedPosts]));
     
-    // Update the posts state
+    
     setPosts(prevPosts => [{
       ...newPost,
       user: newPost.user,
@@ -288,21 +281,21 @@ export default function CommunityFeed() {
       liked: false
     }, ...prevPosts]);
 
-    // Simulate new post notification
+    
     simulateNewPostNotification(sessionUser?.name || 'Un usuario', newPost.id);
 
     setNewPostContent("");
     setPostImage(null);
   };
 
-  // After the handleAddPost function, add this function to simulate new post notifications
+  
   const simulateNewPostNotification = (postAuthor: string, postId: number) => {
-    // Get current user from session or localStorage
+    
     const currentUser = session || JSON.parse(localStorage.getItem('user') || '{}');
     
-    // Simulate other users receiving notifications about new posts
+    
     setTimeout(() => {
-      // Only send notifications to other users
+      
       if (currentUser?.id) {
         addNotification({
           type: "post",
@@ -314,14 +307,14 @@ export default function CommunityFeed() {
           actionUrl: "/comunidad",
         });
       }
-    }, 2000); // 2 second delay
+    }, 2000); 
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check if file is an image
+    
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Error",
@@ -331,7 +324,7 @@ export default function CommunityFeed() {
       return;
     }
     
-    // Check file size (max 5MB)
+    
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "Archivo demasiado grande",
@@ -341,7 +334,7 @@ export default function CommunityFeed() {
       return;
     }
     
-    // Create a preview URL for the image
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setPostImage(reader.result as string);
@@ -357,18 +350,18 @@ export default function CommunityFeed() {
   };
 
   const handleDeletePost = (postId: number) => {
-    // Remove from state
+    
     setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
     
-    // Remove from localStorage
+    
     const savedPosts = JSON.parse(localStorage.getItem('userPosts') || '[]');
     const updatedPosts = savedPosts.filter((post: Post) => post.id !== postId);
     localStorage.setItem('userPosts', JSON.stringify(updatedPosts));
     
-    // Close confirmation dialog
+    
     setShowDeleteConfirm(null);
     
-    // Show success message
+    
     toast({
       title: "Publicación eliminada",
       description: "La publicación se ha eliminado correctamente.",
@@ -443,7 +436,7 @@ export default function CommunityFeed() {
     activeTab === "todos"
       ? posts
       : activeTab === "mios"
-      ? posts.filter((post) => post.user.id === 0) // My posts only
+      ? posts.filter((post) => post.user.id === 0) 
       : posts;
 
   return (
