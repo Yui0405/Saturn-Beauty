@@ -248,7 +248,7 @@
       "userId": "11",
       "userName": "María Pérez",
       "date": "2023-05-31T09:45:00Z",
-      "status": "pendiente",
+      "status": "en proceso",
       "total": 59.98,
       "products": [
         {
@@ -329,7 +329,7 @@
       "userId": "14",
       "userName": "Antonio López",
       "date": "2023-05-31T10:05:00Z",
-      "status": "pendiente",
+      "status": "en proceso",
       "total": 67.98,
       "products": [
         {
@@ -386,6 +386,35 @@
           "quantity": 1
         }
       ]
+    },
+    {
+      "id": "1748912891128",
+      "code": "SB-3670",
+      "userId": "1",
+      "userName": "Lisbeth Márquez",
+      "date": "2025-06-03T01:08:11.128Z",
+      "status": "proceso",
+      "total": 135.96,
+      "products": [
+        {
+          "id": 2,
+          "name": "Serum Vitamina C",
+          "price": 39.99,
+          "quantity": 2
+        },
+        {
+          "id": 7,
+          "name": "Protector Solar FPS 50+",
+          "price": 27.99,
+          "quantity": 2
+        }
+      ],
+      "shippingAddress": "Av. Principal #123, Ciudad",
+      "paymentMethod": "card",
+      "paymentDetails": {
+        "cardLastFour": "5657",
+        "cardBrand": ""
+      }
     }
   ]
 }

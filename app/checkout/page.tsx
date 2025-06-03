@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/contexts/cart-context"
 import { Button } from "@/components/ui/button"
@@ -11,68 +11,208 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/hooks/use-toast"
-import { CreditCard, Truck, CheckCircle2 } from "lucide-react"
+import { CreditCard, Truck, CheckCircle2, AlertCircle } from "lucide-react"
 import Image from "next/image"
+import { getCurrentUser, isAuthenticated } from "@/lib/auth"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, totalPrice, clearCart } = useCart()
   const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [orderNumber, setOrderNumber] = useState("")
+  const [orderTotal, setOrderTotal] = useState(0)
+  const [addressError, setAddressError] = useState("")
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     address: "",
-    city: "",
-    postalCode: "",
-    country: "España",
     paymentMethod: "card",
     cardNumber: "",
     cardName: "",
-    cardExpiry: "",
-    cardCvc: "",
+    cardExpiry: ""
   })
+  
+  const [validationErrors, setValidationErrors] = useState({
+    cardNumber: "",
+    cardName: "",
+    cardExpiry: ""
+  })
+
+  // Cargar datos del usuario al montar el componente
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Verificar si el usuario está autenticado
+      if (!isAuthenticated()) {
+        router.push('/login?redirect=/checkout')
+        return
+      }
+
+      // Obtener datos del usuario actual
+      const currentUser = getCurrentUser()
+      if (currentUser) {
+        // Obtener datos completos del usuario desde localStorage
+        const storedUsers = localStorage.getItem('saturn-users')
+        if (storedUsers) {
+          const users = JSON.parse(storedUsers)
+          const fullUser = users.find((u: any) => u.id === currentUser.id)
+          
+          if (fullUser) {
+            // Actualizar el formulario con los datos del usuario
+            setFormData(prev => ({
+              ...prev,
+              name: fullUser.name || '',
+              email: fullUser.email || '',
+              address: fullUser.direccion || ''
+            }))
+
+
+            // Validar si el usuario tiene dirección
+            if (!fullUser.direccion) {
+              setAddressError('Por favor, actualiza tu dirección en tu perfil antes de continuar con la compra.')
+            }
+          }
+        }
+      }
+      
+      setLoading(false)
+    }
+  }, [router])
+
+  // Redirigir al perfil si no hay dirección
+  const handleUpdateAddress = () => {
+    router.push('/perfil')
+  }
+
+  const validateCardNumber = (number: string) => {
+    // Eliminar espacios y guiones
+    const cleanNumber = number.replace(/\s+/g, '').replace(/-/g, '')
+    // Validar que solo contenga números
+    if (!/^\d+$/.test(cleanNumber)) return "El número de tarjeta solo puede contener dígitos"
+    // Validar longitud (generalmente entre 13 y 19 dígitos)
+    if (cleanNumber.length < 13 || cleanNumber.length > 19) return "Número de tarjeta inválido"
+    return ""
+  }
+
+  const validateCardName = (name: string) => {
+    if (!name.trim()) return "Este campo es obligatorio"
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(name)) return "El nombre solo puede contener letras y espacios"
+    return ""
+  }
+
+  const validateExpiryDate = (date: string) => {
+    if (!/^\d{2}\/\d{2}$/.test(date)) return "Formato inválido (MM/AA)"
+    
+    const [month, year] = date.split('/').map(Number)
+    const currentDate = new Date()
+    const currentYear = currentDate.getFullYear() % 100
+    const currentMonth = currentDate.getMonth() + 1
+    
+    if (month < 1 || month > 12) return "Mes inválido"
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      return "La tarjeta ha expirado"
+    }
+    
+    return ""
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    
+    // Formateo en tiempo real
+    let formattedValue = value
+    
+    if (name === 'cardNumber') {
+      // Formatear como XXXX XXXX XXXX XXXX
+      formattedValue = value
+        .replace(/\D/g, '')
+        .replace(/(\d{4})/g, '$1 ')
+        .trim()
+        .slice(0, 19)
+      
+      // Validar el número de tarjeta
+      const error = validateCardNumber(value)
+      setValidationErrors(prev => ({ ...prev, cardNumber: error }))
+    } 
+    else if (name === 'cardName') {
+      // Validar el nombre en tiempo real
+      const error = validateCardName(value)
+      setValidationErrors(prev => ({ ...prev, cardName: error }))
+    }
+    else if (name === 'cardExpiry') {
+      // Formatear como MM/AA
+      formattedValue = value
+        .replace(/\D/g, '')
+        .replace(/(\d{2})(\d{0,4})/, '$1/$2')
+        .slice(0, 5)
+      
+      // Validar la fecha de expiración
+      const error = validateExpiryDate(formattedValue)
+      setValidationErrors(prev => ({ ...prev, cardExpiry: error }))
+    }
+    
+    setFormData((prev) => ({ ...prev, [name]: formattedValue }))
   }
 
   const handlePaymentMethodChange = (value: string) => {
     setFormData((prev) => ({ ...prev, paymentMethod: value }))
   }
 
-  const validateStep1 = () => {
-    if (!formData.name || !formData.email || !formData.address || !formData.city || !formData.postalCode) {
-      toast({
-        title: "Error",
-        description: "Por favor, completa todos los campos obligatorios",
-        variant: "destructive",
-      })
-      return false
-    }
-    return true
-  }
-
   const validateStep2 = () => {
-    if (formData.paymentMethod === "card") {
-      if (!formData.cardNumber || !formData.cardName || !formData.cardExpiry || !formData.cardCvc) {
-        toast({
-          title: "Error",
-          description: "Por favor, completa todos los datos de la tarjeta",
-          variant: "destructive",
-        })
-        return false
-      }
+    const errors = {
+      cardNumber: formData.paymentMethod === 'card' ? validateCardNumber(formData.cardNumber) : "",
+      cardName: formData.paymentMethod === 'card' ? validateCardName(formData.cardName) : "",
+      cardExpiry: formData.paymentMethod === 'card' ? validateExpiryDate(formData.cardExpiry) : ""
     }
-    return true
+    
+    setValidationErrors(errors)
+    
+    // Verificar si hay algún error
+    return !Object.values(errors).some(error => error !== "")
   }
 
   const handleNextStep = () => {
-    if (step === 1 && validateStep1()) {
+    if (step === 1) {
+      if (!formData.name || !formData.email || !formData.address) {
+        toast({
+          title: "Error",
+          description: "Por favor, completa todos los campos obligatorios",
+          variant: "destructive",
+        })
+        return
+      }
+      
+      // Validar que la dirección no esté vacía
+      if (!formData.address.trim()) {
+        toast({
+          title: "Error",
+          description: "Por favor, ingresa una dirección de envío válida",
+          variant: "destructive",
+        })
+        return
+      }
+      
+      // Actualizar la dirección del usuario en localStorage
+      const currentUser = getCurrentUser()
+      if (currentUser) {
+        const storedUsers = localStorage.getItem('saturn-users')
+        if (storedUsers) {
+          const users = JSON.parse(storedUsers)
+          const userIndex = users.findIndex((u: any) => u.id === currentUser.id)
+          
+          if (userIndex !== -1) {
+            users[userIndex].direccion = formData.address
+            localStorage.setItem('saturn-users', JSON.stringify(users))
+            setAddressError('') // Limpiar el mensaje de error si existía
+          }
+        }
+      }
+      
       setStep(2)
-    } else if (step === 2 && validateStep2()) {
+    } else if (step === 2) {
+      if (formData.paymentMethod === 'card' && !validateStep2()) {
+        return
+      }
       setStep(3)
     }
   }
@@ -81,28 +221,118 @@ export default function CheckoutPage() {
     setStep((prev) => Math.max(prev - 1, 1))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const generateOrderId = () => {
+    return Date.now().toString()
+  }
+
+  const generateOrderCode = () => {
+    const prefix = 'SB'
+    const randomNum = Math.floor(1000 + Math.random() * 9000)
+    return `${prefix}-${randomNum}`
+  }
+
+  const saveOrderToJson = async (orderData: any) => {
+    try {
+      // Leer el archivo orders.json actual
+      const response = await fetch('/data/orders.json')
+      const data = await response.json()
+      
+      // Agregar el nuevo pedido
+      data.orders.push(orderData)
+      
+      // Guardar de vuelta al archivo (esto solo funciona en un entorno con acceso al sistema de archivos)
+      // En producción, necesitarías una API para manejar esto
+      console.log('Nuevo pedido creado:', orderData)
+      
+      // También guardar en localStorage para consistencia
+      localStorage.setItem('saturn-orders', JSON.stringify(data.orders))
+      
+    } catch (error) {
+      console.error('Error al guardar el pedido:', error)
+      // En caso de error, solo guardar en localStorage
+      const orders = JSON.parse(localStorage.getItem('saturn-orders') || '[]')
+      orders.push(orderData)
+      localStorage.setItem('saturn-orders', JSON.stringify(orders))
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateStep2()) return
+    if (!formData.paymentMethod) {
+      toast({
+        title: "Error",
+        description: "Por favor, selecciona un método de pago",
+        variant: "destructive",
+      })
+      return
+    }
 
     setLoading(true)
 
-    // Simular proceso de pago
-    setTimeout(() => {
-      const newOrderNumber = `ORD-${Math.floor(Math.random() * 10000)}`
-      setOrderNumber(newOrderNumber)
-      setLoading(false)
-      setStep(4) // Paso de confirmación
+    try {
+      // Obtener datos del usuario actual
+      const currentUser = getCurrentUser()
+      if (!currentUser) {
+        throw new Error('No se pudo obtener la información del usuario')
+      }
 
-      toast({
-        title: "¡Compra realizada con éxito!",
-        description: "Gracias por tu compra. Recibirás un correo con los detalles.",
-      })
+      // Crear el objeto de pedido
+      const orderId = generateOrderId()
+      const orderCode = generateOrderCode()
+      
+      const orderData = {
+        id: orderId,
+        code: orderCode,
+        userId: currentUser.id,
+        userName: currentUser.name || formData.name,
+        date: new Date().toISOString(),
+        status: 'en proceso', // Estado por defecto
+        total: totalPrice,
+        products: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        shippingAddress: formData.address,
+        paymentMethod: formData.paymentMethod,
+        paymentDetails: {
+          cardLastFour: formData.cardNumber.slice(-4),
+          cardBrand: '' // Podrías detectar la marca de la tarjeta si lo deseas
+        }
+      }
 
+      // Guardar el pedido
+      await saveOrderToJson(orderData)
+      
+      // Guardar el total antes de limpiar el carrito
+      setOrderTotal(totalPrice)
+      
+      // Actualizar el estado
+      setOrderNumber(orderCode)
+      
       // Limpiar carrito después de la compra exitosa
       clearCart()
-    }, 2000)
+      
+      // Navegar al paso de confirmación
+      setStep(4)
+      
+      toast({
+        title: "¡Compra realizada con éxito!",
+        description: `Tu pedido #${orderCode} ha sido registrado.`,
+      })
+      
+    } catch (error) {
+      console.error('Error al procesar el pedido:', error)
+      toast({
+        title: "Error",
+        description: "Ocurrió un error al procesar tu pedido. Por favor, inténtalo de nuevo.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleBackToShopping = () => {
@@ -127,10 +357,45 @@ export default function CheckoutPage() {
     )
   }
 
+  // Mostrar cargando mientras se verifican los datos del usuario
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mint-green mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando tus datos...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Si hay error de dirección, mostrar mensaje y botón para actualizar
+  if (addressError) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+          <div className="flex items-center">
+            <AlertCircle className="h-6 w-6 mr-2" />
+            <p className="font-medium">Dirección de envío requerida</p>
+          </div>
+          <p className="mt-2">{addressError}</p>
+          <div className="mt-4">
+            <Button 
+              onClick={handleUpdateAddress}
+              className="bg-mint-green hover:bg-accent-green hover:text-mint-green"
+            >
+              Actualizar dirección en mi perfil
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center font-playfair">Checkout</h1>
+        <h1 className="text-3xl font-bold mb-8 font-playfair">Checkout</h1>
 
         {step < 4 && (
           <div className="mb-8">
@@ -182,7 +447,7 @@ export default function CheckoutPage() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Tu nombre completo"
+  
                         required
                         className="font-poppins"
                       />
@@ -197,7 +462,7 @@ export default function CheckoutPage() {
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="tu@email.com"
+  
                         required
                         className="font-poppins"
                       />
@@ -205,61 +470,26 @@ export default function CheckoutPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address" className="font-poppins">
-                      Dirección *
+                      Dirección de envío *
                     </Label>
                     <Input
                       id="address"
                       name="address"
                       value={formData.address}
-                      onChange={handleChange}
-                      placeholder="Calle y número"
+                      onChange={(e) => {
+                        handleChange(e)
+                        // Limpiar el error si el usuario empieza a escribir
+                        if (addressError) setAddressError('')
+                      }}
                       required
-                      className="font-poppins"
+                      className={`font-poppins ${addressError ? 'border-red-500' : ''}`}
                     />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city" className="font-poppins">
-                        Ciudad *
-                      </Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        placeholder="Tu ciudad"
-                        required
-                        className="font-poppins"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="postalCode" className="font-poppins">
-                        Código postal *
-                      </Label>
-                      <Input
-                        id="postalCode"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleChange}
-                        placeholder="28001"
-                        required
-                        className="font-poppins"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="country" className="font-poppins">
-                        País *
-                      </Label>
-                      <Input
-                        id="country"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        placeholder="Tu país"
-                        required
-                        className="font-poppins"
-                      />
-                    </div>
+                    {addressError && (
+                      <div className="flex items-center text-red-500 text-sm mt-1">
+                        <AlertCircle className="h-4 w-4 mr-1" />
+                        <span>{addressError}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="mt-6 flex justify-end">
@@ -297,10 +527,16 @@ export default function CheckoutPage() {
                         name="cardNumber"
                         value={formData.cardNumber}
                         onChange={handleChange}
-                        placeholder="1234 5678 9012 3456"
                         required
-                        className="font-poppins"
+                        className={`font-poppins ${validationErrors.cardNumber ? 'border-red-500' : ''}`}
+                        maxLength={19}
                       />
+                      {validationErrors.cardNumber && (
+                        <p className="text-red-500 text-xs mt-1">
+                          <AlertCircle className="inline h-3 w-3 mr-1" />
+                          {validationErrors.cardNumber}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="cardName" className="font-poppins">
@@ -311,10 +547,15 @@ export default function CheckoutPage() {
                         name="cardName"
                         value={formData.cardName}
                         onChange={handleChange}
-                        placeholder="Nombre como aparece en la tarjeta"
                         required
-                        className="font-poppins"
+                        className={`font-poppins ${validationErrors.cardName ? 'border-red-500' : ''}`}
                       />
+                      {validationErrors.cardName && (
+                        <p className="text-red-500 text-xs mt-1">
+                          <AlertCircle className="inline h-3 w-3 mr-1" />
+                          {validationErrors.cardName}
+                        </p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -326,25 +567,18 @@ export default function CheckoutPage() {
                           name="cardExpiry"
                           value={formData.cardExpiry}
                           onChange={handleChange}
-                          placeholder="MM/AA"
                           required
-                          className="font-poppins"
+                          className={`font-poppins ${validationErrors.cardExpiry ? 'border-red-500' : ''}`}
+                          maxLength={5}
                         />
+                        {validationErrors.cardExpiry && (
+                          <p className="text-red-500 text-xs mt-1">
+                            <AlertCircle className="inline h-3 w-3 mr-1" />
+                            {validationErrors.cardExpiry}
+                          </p>
+                        )}
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cardCvc" className="font-poppins">
-                          CVC/CVV *
-                        </Label>
-                        <Input
-                          id="cardCvc"
-                          name="cardCvc"
-                          value={formData.cardCvc}
-                          onChange={handleChange}
-                          placeholder="123"
-                          required
-                          className="font-poppins"
-                        />
-                      </div>
+
                     </div>
                   </div>
                 )}
@@ -369,14 +603,10 @@ export default function CheckoutPage() {
 
                 <div className="mb-6">
                   <h3 className="font-medium mb-2 font-playfair">Información de envío</h3>
-                  <div className="bg-gray-50 p-4 rounded-md font-poppins">
-                    <p>{formData.name}</p>
-                    <p>{formData.email}</p>
-                    <p>{formData.address}</p>
-                    <p>
-                      {formData.city}, {formData.postalCode}
-                    </p>
-                    <p>{formData.country}</p>
+                  <div className="bg-gray-50 p-4 rounded-md font-poppins space-y-1">
+                    <p className="font-medium">{formData.name}</p>
+                    <p className="text-gray-600">{formData.email}</p>
+                    <p className="text-gray-600">{formData.address}</p>
                   </div>
                 </div>
 
@@ -438,11 +668,27 @@ export default function CheckoutPage() {
                     <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
                     <h2 className="text-2xl font-bold mb-2 font-playfair">¡Pedido completado!</h2>
                     <p className="text-gray-600 mb-6 font-poppins">
-                      Gracias por tu compra. Hemos enviado un correo electrónico con los detalles de tu pedido.
+                      Gracias por tu compra. Tu pedido ha sido registrado exitosamente.
                     </p>
-                    <p className="text-sm text-gray-500 mb-6 font-poppins">
-                      Número de pedido: <span className="font-medium">{orderNumber}</span>
-                    </p>
+                    <div className="bg-gray-50 p-4 rounded-md mb-6 text-left font-poppins w-full">
+                      <p className="font-medium mb-2 text-base">Resumen del pedido</p>
+                      <div className="space-y-1">
+                        <p className="text-sm flex justify-between">
+                          <span className="font-medium">Número de pedido:</span>
+                          <span>{orderNumber}</span>
+                        </p>
+                        <p className="text-sm flex justify-between">
+                          <span className="font-medium">Fecha:</span>
+                          <span>{new Date().toLocaleDateString()}</span>
+                        </p>
+                        <div className="pt-2 mt-2 border-t border-gray-200">
+                          <p className="text-base font-semibold flex justify-between">
+                            <span>Total:</span>
+                            <span className="text-mint-green">${orderTotal.toFixed(2)}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     <div className="flex items-center justify-center text-sm text-gray-500 mb-4 font-poppins">
                       <Truck className="h-5 w-5 mr-2" />
                       <span>Tiempo estimado de entrega: 3-5 días hábiles</span>

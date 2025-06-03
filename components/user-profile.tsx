@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toast } from "@/hooks/use-toast"
-import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X, ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react"
+import { User, CreditCard, ShoppingBag, Heart, Settings, LogOut, Upload, X, ChevronLeft, ChevronRight, Eye, EyeOff, PackageOpen } from "lucide-react"
 import { useWishlist } from "@/contexts/wishlist-context"
 import { useCart } from "@/contexts/cart-context"
 import ProductCard from "./product-card"; // Added the missing import
@@ -42,18 +42,18 @@ export interface UserData {
 
 // Default user data
 const defaultUserData: UserData = {
-  id: '',
-  name: 'Usuario',
-  username: 'usuario',
-  email: '',
-  bio: '',
-  telefono: '',
-  direccion: '',
-  avatar: '/images/users/default-avatar.png',
+  id: '1',
+  name: 'Luisa Rodríguez',
+  username: 'luisa.rodriguez',
+  email: 'luisa.rodriguez@email.com',
+  bio: 'Enamorada de los productos de belleza',
+  telefono: '+1234567897',
+  direccion: 'Av. Las Flores #45-67, Ciudad',
+  avatar: '/images/users/User3.jpg',
   role: 'user',
   address: {
-    street: '',
-    city: '',
+    street: 'Av. Las Flores #45-67',
+    city: 'Ciudad',
     postalCode: '',
     country: 'España',
   },
@@ -263,51 +263,71 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
       try {
         setIsLoading(true);
         
-        // Get current user from localStorage
-        const currentUser = typeof window !== 'undefined' ? 
+        // Get current user from localStorage or use default user
+        let currentUser = typeof window !== 'undefined' ? 
           JSON.parse(localStorage.getItem('currentUser') || '{}') : null;
         
+        // If no user is logged in, use default user data
         if (!currentUser?.id) {
-          console.error('No user is logged in');
-          setIsLoading(false);
-          return;
+          console.log('No user logged in, using default user');
+          currentUser = defaultUserData;
+          // Save default user to localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('currentUser', JSON.stringify(defaultUserData));
+          }
         }
 
         // Try to load from localStorage first (matches edit page behavior)
         const storedUsers = localStorage.getItem('saturn-users');
+        let userData = null;
+
+        // 1. Try to find user in localStorage
         if (storedUsers) {
           const users = JSON.parse(storedUsers);
           const foundUser = users.find((u: any) => u.id === currentUser.id);
-          
           if (foundUser) {
-            const userData = formatUserData(foundUser);
-            setUser(userData);
-            setEditedUser(userData);
-            setIsLoading(false);
-            return;
+            userData = formatUserData(foundUser);
           }
         }
 
-        // If not in localStorage, load from JSON (matches edit page behavior)
-        try {
-          const response = await fetch('/data/users.json');
-          const data = await response.json();
-          const foundUser = data.users.find((u: any) => u.id === currentUser.id);
-          
-          if (foundUser) {
-            const userData = formatUserData(foundUser);
-            setUser(userData);
-            setEditedUser(userData);
-          } else {
-            console.warn('User not found in users.json, using default data');
-            const defaultData = { ...defaultUserData, id: currentUser.id };
-            setUser(defaultData);
-            setEditedUser(defaultData);
+        // 2. If not found in localStorage, try to load from users.json
+        if (!userData) {
+          try {
+            const response = await fetch('/data/users.json');
+            if (response.ok) {
+              const data = await response.json();
+              const userFromJson = data.users.find((u: any) => u.id.toString() === currentUser.id.toString());
+              
+              if (userFromJson) {
+                userData = {
+                  ...defaultUserData,
+                  ...userFromJson,
+                  name: userFromJson.name || currentUser.name || '',
+                  email: userFromJson.email || currentUser.email || '',
+                  username: userFromJson.username || currentUser.username || '',
+                  avatar: userFromJson.avatar || currentUser.avatar || defaultUserData.avatar
+                };
+              }
+            }
+          } catch (error) {
+            console.error('Error loading user data from JSON:', error);
           }
-        } catch (error) {
-          console.error('Error loading from users.json:', error);
-          throw error;
         }
+
+        // 3. If still no data, use currentUser from localStorage
+        if (!userData) {
+          userData = {
+            ...defaultUserData,
+            id: currentUser.id,
+            name: currentUser.name || '',
+            email: currentUser.email || '',
+            username: currentUser.username || '',
+            avatar: currentUser.avatar || defaultUserData.avatar
+          };
+        }
+
+        setUser(userData);
+        setEditedUser(userData);
         
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -950,71 +970,9 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
               <CardDescription className="font-poppins">Revisa tus pedidos anteriores y su estado.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {user.orders.map((order) => (
-                  <div key={order.id} className="border rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="font-poppins">
-                          <p className="font-medium">Pedido #{order.id}</p>
-                          <p className="text-sm text-gray-500">Fecha: {order.date}</p>
-                          {order.trackingNumber && (
-                            <p className="text-sm text-gray-500">Seguimiento: {order.trackingNumber}</p>
-                          )}
-                          {order.estimatedDelivery && (
-                            <p className="text-sm text-gray-500">Entrega estimada: {order.estimatedDelivery}</p>
-                          )}
-                        </div>
-                        <div className="text-right font-poppins">
-                          <p className="font-medium">${order.total.toFixed(2)}</p>
-                          <p className={`text-sm ${getStatusColor(order.status)}`}>{order.status}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-medium mb-3 font-playfair text-mint-green-dark">Productos ({order.items.length})</h4>
-                      <div className="space-y-3">
-                        {order.items.map((item) => (
-                          <div key={item.id} className="flex items-center gap-3">
-                            <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded border">
-                              <Image
-                                src={item.image || "/images/placeholder.svg"}
-                                alt={item.name}
-                                width={48}
-                                height={48}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                            <div className="flex-1 font-poppins">
-                              <p className="font-medium text-sm">{item.name}</p>
-                              <p className="text-xs text-gray-500">
-                                Cantidad: {item.quantity} × ${item.price.toFixed(2)}
-                              </p>
-                            </div>
-                            <p className="font-medium font-poppins">${(item.price * item.quantity).toFixed(2)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 p-4 flex justify-between items-center">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="font-poppins">
-                          Ver Detalles
-                        </Button>
-                        {order.status === "Entregado" && (
-                          <Button variant="outline" size="sm" className="font-poppins">
-                            Recomprar
-                          </Button>
-                        )}
-                      </div>
-                      {order.trackingNumber && (
-                        <Button variant="link" size="sm" className="font-poppins text-mint-green">
-                          Rastrear Pedido
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-12">
+                <PackageOpen className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                <p className="text-gray-500 font-poppins">No hay pedidos para mostrar</p>
               </div>
             </CardContent>
           </Card>
@@ -1147,83 +1105,6 @@ export default function UserProfile({ initialTab = "account" }: { initialTab?: s
                   </div>
                 </div>
 
-                <div className="border-t pt-6">
-                  <h3 className="font-medium mb-4 font-playfair">Cambiar Contraseña</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="current-password" className="font-poppins">
-                        Contraseña Actual
-                      </Label>
-                      <div className="relative">
-                        <Input 
-                          id="current-password" 
-                          type={showCurrentPassword ? "text" : "password"} 
-                          className="font-poppins pr-10" 
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          {showCurrentPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password" className="font-poppins">
-                        Nueva Contraseña
-                      </Label>
-                      <div className="relative">
-                        <Input 
-                          id="new-password" 
-                          type={showNewPassword ? "text" : "password"} 
-                          className="font-poppins pr-10" 
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          {showNewPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="font-poppins">
-                        Confirmar Nueva Contraseña
-                      </Label>
-                      <div className="relative">
-                        <Input 
-                          id="confirm-password" 
-                          type={showConfirmPassword ? "text" : "password"} 
-                          className="font-poppins pr-10" 
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <Button className="bg-mint-green hover:bg-accent-green hover:text-mint-green font-poppins">
-                      Cambiar Contraseña
-                    </Button>
-                  </div>
-                </div>
 
                 <div className="border-t pt-6">
                   <h3 className="font-medium mb-4 font-playfair text-mint-green-dark">Notificaciones</h3>
